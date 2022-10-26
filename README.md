@@ -236,6 +236,6 @@ GeodataFlow has been created by `Alvaro Huarte` <https://www.linkedin.com/in/alv
 
 ## Credits
 
-GeodataFlow is built on top of amazingly useful open source projects. See NOTICE file for details about those projects
+GeodataFlow is built on top of amazingly useful open source projects. See [NOTICE](NOTICE) file for details about those projects
 and their licenses.
 Thank you to all the authors of these projects!
