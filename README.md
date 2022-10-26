@@ -4,7 +4,7 @@ Toolkit to run workflows on Geospatial & Earth Observation (EO) data.
 
 **GeodataFlow** is a Python library for fetching, translating and manipulating Geospatial data (*Raster*, *Vector*, *EO/STAC collections*) by using a *Pipeline* or sequence of operations on input data. It is very much like the GDAL library which handles raster and vector data. This page provides high level overview of the library and its philosophy. Visit docs to list data formats it supports (Readers & Writers), and see Filters for filtering operations that you can apply with GeodataFlow.
 
-In addition to the library code, **GeodataFlow** provides a command-line application and a [REST WebAPI](#rest-api) (FastAPI) endpoint that users can conveniently use to process, filter, translate, and query Geospatial data. Applications provide more information on that topic.
+In addition to the library code, **GeodataFlow** provides a command-line application and a [REST WebAPI](#rest-webapi) (FastAPI) endpoint that users can conveniently use to process, filter, translate, and query Geospatial data. Applications provide more information on that topic.
 
 **GeodataFlow** provides as well a [Workbench](#workbench) UI designer for users easily draw and run their own workflows.
 
