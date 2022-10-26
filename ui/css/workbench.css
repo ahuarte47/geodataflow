@@ -176,6 +176,8 @@ header a {
 }
 
 .drawflow .drawflow-node .input, .drawflow .drawflow-node .output {
+  position: absolute;
+  top: 16px;
   height: 15px;
   width: 15px;
   border: 2px solid var(--border-color);
@@ -186,7 +188,7 @@ header a {
 }
 
 .drawflow .drawflow-node .output {
-  right: 10px;
+  right: -10px;
 }
 
 .drawflow .drawflow-node .input {
@@ -233,7 +235,7 @@ header a {
   background: var(--background-box-title);
   border-bottom: 1px solid #e9e9e9;
   border-radius: 4px 4px 0px 0px;
-  padding-left: 10px;
+  padding-left: 14px;
 }
 
 .drawflow .title-box svg {
