@@ -1,0 +1,22 @@
+{
+  "pipeline": [
+    # Read Raster from Gtiff file.
+    {
+        "type": "RasterReader",
+        "connectionString": "${TEST_DATA_PATH}/S2L2A-tiff-sample.tif"
+    },
+    # Tranforms CRS of input Datasets.
+    {
+      "type": "RasterTransform",
+      "sourceCrs": "EPSG:4326",
+      "targetCrs": 25830,
+      "resampleAlg": "Bilinear"
+    },
+    # Save Raster to Gtiff.
+    {
+      "type": "RasterWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.tif",
+      "formatOptions": [ "-of", "Gtiff", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "PREDICTOR=2" ]
+    }
+  ]
+}

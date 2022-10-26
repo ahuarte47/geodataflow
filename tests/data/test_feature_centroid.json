@@ -1,0 +1,35 @@
+{
+  "pipeline": [
+    # Read Features from embedded GeoJson FeatureCollection.
+    {
+        "type": "FeatureReader",
+
+        "connectionString": {
+          "type": "FeatureCollection",
+          "crs": {
+            "type": "name",
+            "properties": { "name": "EPSG:4326" }
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": { "id": 0, "name": "My AOI for testing" },
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[-1.746826,42.773227],[-1.746826,42.860866],[-1.558685,42.860866],[-1.558685,42.773227],[-1.746826,42.773227]]]
+              }
+            }
+          ]
+        }
+    },
+    # Centroid of Geometries of input Features.
+    {
+      "type": "GeometryCentroid"
+    },
+    # Save Features to GeoPackage.
+    {
+      "type": "FeatureWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.gpkg"
+    }
+  ]
+}

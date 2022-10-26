@@ -1,0 +1,145 @@
+{
+  "drawflow": {
+    "Home": {
+      "data": {
+        "1": {
+          "id": 1,
+          "name": "welcome",
+          "data": {},
+          "class": "welcome",
+          "html": "<div><div class=\"title-box\">👏 Welcome!!</div>\n      <div class=\"box\">\n        <p>Have fun with <b>GeodataFlow</b> running workflows on Geospatial & Earth Observation (EO) data.</p><br><p><b><u>Shortkeys:</u></b></p>\n        <p>🎹 <b>Delete</b> for remove selected<br>\n        💠 Mouse Left Click == Move<br>\n        ❌ Mouse Right == Delete Option<br>\n        🔍 Ctrl + Wheel == Zoom<br></p>\n      </div></div>",
+          "typenode": false,
+          "inputs": {},
+          "outputs": {},
+          "pos_x": 50,
+          "pos_y": 50
+        },
+        "2cdaf26d-050d-482a-84f5-a471d2189316": {
+          "id": "2cdaf26d-050d-482a-84f5-a471d2189316",
+          "name": "reader",
+          "data": {
+            "comment": "",
+            "moduleClass": "FeatureReader",
+            "url_for_connectionstring": "",
+            "connectionstring": "$(geojson_for_connectionstring)",
+            "where": "",
+            "spatialfilter": "",
+            "countlimit": "",
+            "geojson_for_connectionstring": {
+              "type": "FeatureCollection",
+              "features": [
+                {
+                  "type": "Feature",
+                  "properties": {},
+                  "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                      [
+                        [
+                          -1.72554,
+                          42.779779
+                        ],
+                        [
+                          -1.72554,
+                          42.848786
+                        ],
+                        [
+                          -1.569672,
+                          42.848786
+                        ],
+                        [
+                          -1.569672,
+                          42.779779
+                        ],
+                        [
+                          -1.72554,
+                          42.779779
+                        ]
+                      ]
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "class": "reader",
+          "html": "\n            <div>\n              <div class=\"title-box\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Reads Features with Geometries from a Geospatial DataSource using OGR providers.\"><svg class=\"svg-inline--fa fa-database fa-w-14\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"fas\" data-icon=\"database\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 448 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M448 73.143v45.714C448 159.143 347.667 192 224 192S0 159.143 0 118.857V73.143C0 32.857 100.333 0 224 0s224 32.857 224 73.143zM448 176v102.857C448 319.143 347.667 352 224 352S0 319.143 0 278.857V176c48.125 33.143 136.208 48.572 224 48.572S399.874 209.143 448 176zm0 160v102.857C448 479.143 347.667 512 224 512S0 479.143 0 438.857V336c48.125 33.143 136.208 48.572 224 48.572S399.874 369.143 448 336z\"></path></svg><!-- <i class=\"fas fa-database\"></i> Font Awesome fontawesome.com --> FeatureReader\n                <div class=\"drawflow-box12\" onclick=\"_box12_onClick(event)\" style=\"display: none;\">+</div>\n              </div>\n              <div class=\"box module-box1\">\n                <div>\n          <div class=\"parameter-row\">\n            <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"far\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z\"></path></svg><!-- <i class=\"parameter-icon far fa-circle\"></i> Font Awesome fontawesome.com -->\n            <div class=\"parameter-label\" onclick=\"editParameterOfModule(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Connection string of the Feature Store.\" data-type=\"reader\" data-module=\"FeatureReader\" data-param=\"connectionString\"> connectionString\n              <div class=\"modal-node\" style=\"display: none;\">\n                <div class=\"modal-content\" style=\"position: absolute; left: 92px; top: 449px;\">\n                  <div class=\"title-box\" onclick=\"finishEditionOfParameter(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Connection string of the Feature Store.\">\n                    <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"fas\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z\"></path></svg><!-- <i class=\"parameter-icon fas fa-circle\"></i> Font Awesome fontawesome.com --> connectionString\n                    <span class=\"close\" onclick=\"closeModal(event)\">×</span>\n                  </div>\n                  <div class=\"parameter-box\">\n                    \n        <table style=\"width:100%;\">\n          <tbody><tr>\n            <td style=\"width:85px;\">\n              <select class=\"parameter-select\" onchange=\"_parameterDataTypes_onChange(event)\" df-connectionstring=\"\"><option value=\"$(file_for_connectionstring)\" selected=\"\">file</option><option value=\"$(url_for_connectionstring)\">url</option><option value=\"$(geojson_for_connectionstring)\">geojson</option></select>\n            </td>\n            <td>\n              <div style=\"overflow: clip; white-space: nowrap; display: none;\">\n                <input type=\"button\" class=\"parameter-button\" onclick=\"_uploadFile_onClick(event)\" value=\"Select file...\" data-key=\"file_for_connectionstring\" data-extensions=\".geojson, .gpkg, .shp.zip\">\n                <span style=\"padding-left:4px;\"></span>\n              </div><input type=\"url\" class=\"parameter-text\" placeholder=\"https://example.com\" value=\"\" df-url_for_connectionstring=\"\" hidden=\"\" style=\"display: none;\">\n              <div style=\"overflow: clip; white-space: nowrap; display: block;\" hidden=\"\">\n                <input type=\"button\" class=\"parameter-button\" onclick=\"_drawGeometry_onClick(event)\" value=\"Draw geometry...\" data-key=\"geojson_for_connectionstring\">\n                <span style=\"padding-left:4px;\">1 geometries</span>\n              </div></td>\n          </tr>\n        </tbody></table>\n                  </div>\n                </div>\n              </div>\n            </div>\n          </div></div><div>\n          <div class=\"parameter-row\">\n            <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"far\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z\"></path></svg><!-- <i class=\"parameter-icon far fa-circle\"></i> Font Awesome fontawesome.com -->\n            <div class=\"parameter-label\" onclick=\"editParameterOfModule(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Attribute query string when fetching features (Optional).\" data-type=\"reader\" data-module=\"FeatureReader\" data-param=\"where\"> where\n              <div class=\"modal-node\" style=\"display:none\">\n                <div class=\"modal-content\">\n                  <div class=\"title-box\" onclick=\"finishEditionOfParameter(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Attribute query string when fetching features (Optional).\">\n                    <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"fas\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z\"></path></svg><!-- <i class=\"parameter-icon fas fa-circle\"></i> Font Awesome fontawesome.com --> where\n                    <span class=\"close\" onclick=\"closeModal(event)\">×</span>\n                  </div>\n                  <div class=\"parameter-box\">\n                    <input type=\"text\" class=\"parameter-text\" placeholder=\"\" value=\"\" df-where=\"\">\n                  </div>\n                </div>\n              </div>\n            </div>\n          </div></div><div>\n          <div class=\"parameter-row\">\n            <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"far\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z\"></path></svg><!-- <i class=\"parameter-icon far fa-circle\"></i> Font Awesome fontawesome.com -->\n            <div class=\"parameter-label\" onclick=\"editParameterOfModule(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Geometry to be used as spatial filter when fetching features (Optional).\" data-type=\"reader\" data-module=\"FeatureReader\" data-param=\"spatialFilter\"> spatialFilter\n              <div class=\"modal-node\" style=\"display:none\">\n                <div class=\"modal-content\">\n                  <div class=\"title-box\" onclick=\"finishEditionOfParameter(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Geometry to be used as spatial filter when fetching features (Optional).\">\n                    <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"fas\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z\"></path></svg><!-- <i class=\"parameter-icon fas fa-circle\"></i> Font Awesome fontawesome.com --> spatialFilter\n                    <span class=\"close\" onclick=\"closeModal(event)\">×</span>\n                  </div>\n                  <div class=\"parameter-box\">\n                    <input type=\"text\" class=\"parameter-text\" placeholder=\"\" value=\"\" df-spatialfilter=\"\">\n                  </div>\n                </div>\n              </div>\n            </div>\n          </div></div><div>\n          <div class=\"parameter-row\">\n            <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"far\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z\"></path></svg><!-- <i class=\"parameter-icon far fa-circle\"></i> Font Awesome fontawesome.com -->\n            <div class=\"parameter-label\" onclick=\"editParameterOfModule(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Maximum number of Features to fetch (Optional).\" data-type=\"reader\" data-module=\"FeatureReader\" data-param=\"countLimit\"> countLimit\n              <div class=\"modal-node\" style=\"display:none\">\n                <div class=\"modal-content\">\n                  <div class=\"title-box\" onclick=\"finishEditionOfParameter(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Maximum number of Features to fetch (Optional).\">\n                    <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"fas\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z\"></path></svg><!-- <i class=\"parameter-icon fas fa-circle\"></i> Font Awesome fontawesome.com --> countLimit\n                    <span class=\"close\" onclick=\"closeModal(event)\">×</span>\n                  </div>\n                  <div class=\"parameter-box\">\n                    <input type=\"text\" class=\"parameter-text\" oninput=\"this.value = stringAsInteger(this.value);\" value=\"\" df-countlimit=\"\">\n                  </div>\n                </div>\n              </div>\n            </div>\n          </div></div>\n              </div>\n              <div class=\"box module-box2\" hidden=\"\">\n                <textarea class=\"module-description-area\" onfocusout=\"_commentTextArea_onChange(event)\" placeholder=\"Write your comments here...\" df-comment=\"\"></textarea>\n              </div>\n            </div>",
+          "typenode": false,
+          "inputs": {},
+          "outputs": {
+            "output_1": {
+              "connections": [
+                {
+                  "node": "a83da19b-6c23-447b-8df0-c1b07d069e4b",
+                  "output": "input_1"
+                }
+              ]
+            }
+          },
+          "pos_x": 80,
+          "pos_y": 396
+        },
+        "a83da19b-6c23-447b-8df0-c1b07d069e4b": {
+          "id": "a83da19b-6c23-447b-8df0-c1b07d069e4b",
+          "name": "filter",
+          "data": {
+            "comment": "",
+            "moduleClass": "GeometryTransform",
+            "sourcecrs": "EPSG:4326",
+            "targetcrs": "EPSG:25830"
+          },
+          "class": "filter",
+          "html": "\n            <div>\n              <div class=\"title-box\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Transforms input Geometries or Rasters between two Spatial Reference Systems (CRS).\"><svg class=\"svg-inline--fa fa-tools fa-w-16\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"fas\" data-icon=\"tools\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M501.1 395.7L384 278.6c-23.1-23.1-57.6-27.6-85.4-13.9L192 158.1V96L64 0 0 64l96 128h62.1l106.6 106.6c-13.6 27.8-9.2 62.3 13.9 85.4l117.1 117.1c14.6 14.6 38.2 14.6 52.7 0l52.7-52.7c14.5-14.6 14.5-38.2 0-52.7zM331.7 225c28.3 0 54.9 11 74.9 31l19.4 19.4c15.8-6.9 30.8-16.5 43.8-29.5 37.1-37.1 49.7-89.3 37.9-136.7-2.2-9-13.5-12.1-20.1-5.5l-74.4 74.4-67.9-11.3L334 98.9l74.4-74.4c6.6-6.6 3.4-17.9-5.7-20.2-47.4-11.7-99.6.9-136.6 37.9-28.5 28.5-41.9 66.1-41.2 103.6l82.1 82.1c8.1-1.9 16.5-2.9 24.7-2.9zm-103.9 82l-56.7-56.7L18.7 402.8c-25 25-25 65.5 0 90.5s65.5 25 90.5 0l123.6-123.6c-7.6-19.9-9.9-41.6-5-62.7zM64 472c-13.2 0-24-10.8-24-24 0-13.3 10.7-24 24-24s24 10.7 24 24c0 13.2-10.7 24-24 24z\"></path></svg><!-- <i class=\"fas fa-tools\"></i> Font Awesome fontawesome.com --> GeometryTransform\n                <div class=\"drawflow-box12\" onclick=\"_box12_onClick(event)\" style=\"display: none;\">+</div>\n              </div>\n              <div class=\"box module-box1\">\n                <div>\n          <div class=\"parameter-row\">\n            <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"far\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z\"></path></svg><!-- <i class=\"parameter-icon far fa-circle\"></i> Font Awesome fontawesome.com -->\n            <div class=\"parameter-label\" onclick=\"editParameterOfModule(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Source Spatial Reference System (CRS), SRID, WKT, PROJ formats are supported.                         It uses input CRS when this param is not specified.\" data-type=\"filter\" data-module=\"GeometryTransform\" data-param=\"sourceCrs\"> sourceCrs\n              <div class=\"modal-node\" style=\"display: none;\">\n                <div class=\"modal-content\" style=\"position: absolute; left: 394px; top: 420px;\">\n                  <div class=\"title-box\" onclick=\"finishEditionOfParameter(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Source Spatial Reference System (CRS), SRID, WKT, PROJ formats are supported.                         It uses input CRS when this param is not specified.\">\n                    <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"fas\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z\"></path></svg><!-- <i class=\"parameter-icon fas fa-circle\"></i> Font Awesome fontawesome.com --> sourceCrs\n                    <span class=\"close\" onclick=\"closeModal(event)\">×</span>\n                  </div>\n                  <div class=\"parameter-box\">\n                    <input type=\"text\" class=\"parameter-text\" placeholder=\"EPSG:XXXX or...\" value=\"\" df-sourcecrs=\"\">\n                  </div>\n                </div>\n              </div>\n            </div>\n          </div></div><div>\n          <div class=\"parameter-row\">\n            <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"far\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z\"></path></svg><!-- <i class=\"parameter-icon far fa-circle\"></i> Font Awesome fontawesome.com -->\n            <div class=\"parameter-label\" onclick=\"editParameterOfModule(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Output Spatial Reference System (CRS), SRID, WKT, PROJ formats are supported.\" data-type=\"filter\" data-module=\"GeometryTransform\" data-param=\"targetCrs\"> targetCrs\n              <div class=\"modal-node\" style=\"display: none;\">\n                <div class=\"modal-content\" style=\"position: absolute; left: 394px; top: 454px;\">\n                  <div class=\"title-box\" onclick=\"finishEditionOfParameter(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Output Spatial Reference System (CRS), SRID, WKT, PROJ formats are supported.\">\n                    <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"fas\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z\"></path></svg><!-- <i class=\"parameter-icon fas fa-circle\"></i> Font Awesome fontawesome.com --> targetCrs\n                    <span class=\"close\" onclick=\"closeModal(event)\">×</span>\n                  </div>\n                  <div class=\"parameter-box\">\n                    <input type=\"text\" class=\"parameter-text\" placeholder=\"EPSG:XXXX or...\" value=\"\" df-targetcrs=\"\">\n                  </div>\n                </div>\n              </div>\n            </div>\n          </div></div>\n              </div>\n              <div class=\"box module-box2\" hidden=\"\">\n                <textarea class=\"module-description-area\" onfocusout=\"_commentTextArea_onChange(event)\" placeholder=\"Write your comments here...\" df-comment=\"\"></textarea>\n              </div>\n            </div>",
+          "typenode": false,
+          "inputs": {
+            "input_1": {
+              "connections": [
+                {
+                  "node": "2cdaf26d-050d-482a-84f5-a471d2189316",
+                  "input": "output_1"
+                }
+              ]
+            }
+          },
+          "outputs": {
+            "output_1": {
+              "connections": [
+                {
+                  "node": "c9b1c73e-b984-456b-a4f2-5ee240accd39",
+                  "output": "input_1"
+                }
+              ]
+            }
+          },
+          "pos_x": 384,
+          "pos_y": 369
+        },
+        "c9b1c73e-b984-456b-a4f2-5ee240accd39": {
+          "id": "c9b1c73e-b984-456b-a4f2-5ee240accd39",
+          "name": "writer",
+          "data": {
+            "comment": "",
+            "moduleClass": "FeatureWriter",
+            "connectionstring": "output.geojson"
+          },
+          "class": "writer",
+          "html": "\n            <div>\n              <div class=\"title-box\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Writes Features with Geometries to a Geospatial DataStore using OGR providers.\"><svg class=\"svg-inline--fa fa-save fa-w-14\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"fas\" data-icon=\"save\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 448 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M433.941 129.941l-83.882-83.882A48 48 0 0 0 316.118 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V163.882a48 48 0 0 0-14.059-33.941zM224 416c-35.346 0-64-28.654-64-64 0-35.346 28.654-64 64-64s64 28.654 64 64c0 35.346-28.654 64-64 64zm96-304.52V212c0 6.627-5.373 12-12 12H76c-6.627 0-12-5.373-12-12V108c0-6.627 5.373-12 12-12h228.52c3.183 0 6.235 1.264 8.485 3.515l3.48 3.48A11.996 11.996 0 0 1 320 111.48z\"></path></svg><!-- <i class=\"fas fa-save\"></i> Font Awesome fontawesome.com --> FeatureWriter\n                <div class=\"drawflow-box12\" onclick=\"_box12_onClick(event)\" style=\"display: none;\">+</div>\n              </div>\n              <div class=\"box module-box1\">\n                <div>\n          <div class=\"parameter-row\">\n            <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"far\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z\"></path></svg><!-- <i class=\"parameter-icon far fa-circle\"></i> Font Awesome fontawesome.com -->\n            <div class=\"parameter-label\" onclick=\"editParameterOfModule(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Connection string of the Feature Store ('.geojson', '.gpkg', '.shp.zip' extensions are supported).\" data-type=\"writer\" data-module=\"FeatureWriter\" data-param=\"connectionString\"> connectionString\n              <div class=\"modal-node\" style=\"display: none;\">\n                <div class=\"modal-content\" style=\"position: absolute; left: 686px; top: 388px;\">\n                  <div class=\"title-box\" onclick=\"finishEditionOfParameter(event)\" onmouseover=\"mouseOverNode(event)\" tooltip=\"Connection string of the Feature Store ('.geojson', '.gpkg', '.shp.zip' extensions are supported).\">\n                    <svg class=\"svg-inline--fa fa-circle fa-w-16 parameter-icon\" aria-hidden=\"true\" focusable=\"false\" data-prefix=\"fas\" data-icon=\"circle\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" data-fa-i2svg=\"\"><path fill=\"currentColor\" d=\"M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z\"></path></svg><!-- <i class=\"parameter-icon fas fa-circle\"></i> Font Awesome fontawesome.com --> connectionString\n                    <span class=\"close\" onclick=\"closeModal(event)\">×</span>\n                  </div>\n                  <div class=\"parameter-box\">\n                    <input type=\"text\" class=\"parameter-text\" placeholder=\"\" value=\"output.gpkg\" df-connectionstring=\"\">\n                  </div>\n                </div>\n              </div>\n            </div>\n          </div></div>\n              </div>\n              <div class=\"box module-box2\" hidden=\"\">\n                <textarea class=\"module-description-area\" onfocusout=\"_commentTextArea_onChange(event)\" placeholder=\"Write your comments here...\" df-comment=\"\"></textarea>\n              </div>\n            </div>",
+          "typenode": false,
+          "inputs": {
+            "input_1": {
+              "connections": [
+                {
+                  "node": "a83da19b-6c23-447b-8df0-c1b07d069e4b",
+                  "input": "output_1"
+                }
+              ]
+            }
+          },
+          "outputs": {},
+          "pos_x": 673,
+          "pos_y": 337
+        }
+      }
+    }
+  }
+}

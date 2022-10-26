@@ -1,0 +1,14 @@
+{
+  "pipeline": [
+    # Read Raster from Gtiff file.
+    {
+        "type": "RasterReader",
+        "connectionString": "${TEST_DATA_PATH}/S2L2A-tiff-sample.tif"
+    },
+    # Save Raster as Geometry to GeoPackage.
+    {
+      "type": "FeatureWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.gpkg"
+    }
+  ]
+}

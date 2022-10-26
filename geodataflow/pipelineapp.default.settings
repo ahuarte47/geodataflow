@@ -1,0 +1,14 @@
+# =============================================================================
+# Settings to configure the GeodataFlow Application.
+#
+#   GeodataFlow:
+#   Toolkit to run workflows on Geospatial & Earth Observation (EO) data.
+#
+# =============================================================================
+
+# Settings to connect to EO Providers via EODAG platform.
+EODAG__THEIA__AUTH__CREDENTIALS__IDENT = 'XXX'
+EODAG__THEIA__AUTH__CREDENTIALS__PASS  = 'YYY'
+
+# Extra path[s] of available custom Modules to use in the Pipeline manager.
+GEODATAFLOW__CUSTOM__MODULES__PATH = ''

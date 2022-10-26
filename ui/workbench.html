@@ -1,0 +1,1117 @@
+﻿<!--
+  ===============================================================================
+
+   GeodataFlow:
+   Toolkit to run workflows on Geospatial & Earth Observation (EO) data.
+
+   Copyright (c) 2022, Alvaro Huarte. All rights reserved.
+
+   Redistribution and use of this code in source and binary forms, with
+   or without modification, are permitted provided that the following
+   conditions are met:
+   * Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+
+   THIS CODE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+   TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+   PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+   OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SAMPLE CODE, EVEN IF
+   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+  ===============================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>GeodataFlow | Workflows on Geospatial data</title>
+  <meta name="description" content="GeodataFlow allows you to run workflows on Geospatial & Earth Observation (EO) data.">
+  <link rel="icon" type="image/x-icon" href="images/globe.ico">
+</head>
+<body>
+  <!-- Imports -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow@0.0.56/dist/drawflow.min.css">
+  <script src="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow@0.0.56/dist/drawflow.min.js"></script>
+  <script src="https://unpkg.com/micromodal/dist/micromodal.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js" integrity="sha512-Tn2m0TIpgVyTzzvmxLNuqbSJH3JP8jm+Cy3hvHrW7ndTDcJ1w5mBiksqDBb8GpE2ksktFvDB/ykZ0mDpsZj20w==" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <script src="https://unpkg.com/@tmcw/togeojson@4.7.0/dist/togeojson.umd.js"></script>
+  <script src="https://unpkg.com/leaflet-filelayer@1.2.0"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-mouse-position@1.2.0/src/L.Control.MousePosition.css" />
+  <script src="https://unpkg.com/leaflet-mouse-position@1.2.0/src/L.Control.MousePosition.js"></script>
+
+  <!-- JQuery Datepicker -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" type="text/css" href="css/workbench.css" />
+  <link rel="stylesheet" type="text/css" href="css/dialog.css" />
+  <link rel="stylesheet" type="text/css" href="css/toolbar.css" />
+  <link rel="stylesheet" type="text/css" href="css/toc.css" />
+  <link rel="stylesheet" type="text/css" href="css/gallery.css" />
+  <link rel="stylesheet" type="text/css" href="css/leaflet.css" />
+  <link rel="stylesheet" type="text/css" href="css/requests.css" />
+
+  <!-- DOM content -->
+  <header>
+    <h2 id="_appTitleBox">GeodataFlow</h2>
+  </header>
+  <div class="workbench">
+    <input type="file" id="_openType" onchange="_openButton_onSelected(this)" accept=".gdf" hidden>
+
+    <div class="toolbar">
+      <button type="button" class="toolButton" id="_createButton" onclick="_createButton_onClick(event)" title="New workflow">
+        <i class="far fa-file fa-2x"></i>
+      </button>
+      <button type="button" class="toolButton" id="_openButton" onclick="document.getElementById('_openType').click()" title="Open workflow">
+        <i class="far fa-folder-open fa-2x"></i>
+      </button>
+      <button type="button" class="toolButton" id="_galleryButton" onclick="_galleryButton_onClick(event)" title="Gallery">
+        <i class="fas fa-book fa-2x"></i>
+      </button>
+      <button type="button" class="toolButton" id="_saveButton" onclick="_saveButton_onClick(event)" title="Download workflow">
+        <i class="far fa-save fa-2x"></i>
+      </button>
+      <div class="separatorButton">
+      </div>
+      <button type="button" class="toolButton" id="_undoButton" onclick="_undoredoButton_onClick(event, -1)" title="Undo" disabled>
+        <i class="fas fa-undo-alt fa-2x"></i>
+      </button>
+      <button type="button" class="toolButton" id="_redoButton" onclick="_undoredoButton_onClick(event, +1)" title="Redo" disabled>
+        <i class="fas fa-redo-alt fa-2x"></i>
+      </button>
+      <div class="separatorButton">
+      </div>
+      <button type="button" class="toolButton" id="_copyButton" onclick="_copyButton_onClick(event)" title="Clone object" disabled>
+        <i class="far fa-clone fa-2x"></i>
+      </button>
+      <div class="separatorButton">
+      </div>
+      <button type="button" class="toolButton" id="_runButton" onclick="_runButton_onClick(event)" title="Run" disabled>
+        <i class="fas fa-bolt fa-2x"></i>
+        <i class="far fa-clock fa-1x buttonFlag" id="_runButtonFlag" title=""></i>
+      </button>
+      <button type="button" class="toolButton" id="_requestsButton" onclick="_requestsButton_onClick(event)" title="Requests" disabled>
+        <i class="fas fa-table fa-2x"></i>
+        <i class="fas fa-question-circle fa-1x buttonFlag" id="_requestsButtonFlag" title="You have new unseen results!"></i>
+      </button>
+      <div class="separatorButton">
+      </div>
+      <button type="button" class="toolButton" id="_pipelineButton" onclick="_pipelineButton_onClick(event)" title="Create & download pipeline (For devs)">
+        <i class="far fa-file-code fa-2x"></i>
+      </button>
+    </div>
+    <div class="wrapper">
+      <!-- TOC panel -->
+      <div class="col">
+        <div class="drag-drawflow" draggable="true" ondragstart="dragNode(event)" data-type="comment", id='toc-comment'>
+          <i class="fas fa-tag"></i>
+          <span onmouseover="mouseOverNode(event)" toolTip="Adds a Comment to your workflow"> Comment</span>
+        </div>
+        <div>
+          <ul id="toc-tree">
+            <li>
+              <span class="category" onmouseover="mouseOverNode(event)" toolTip="Drag&Drop objects into your workflow">Modules</span>
+              <ul class="category-nested" id="toc-node">
+                <!-- <li>...</li> -->
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- Workbench area -->
+      <div class="col-right">
+        <div class="menu">
+          <ul>
+            <li data-name="Home" class="selected">Default</li>
+          </ul>
+        </div>
+        <div id="drawflow" ondrop="dropNode(event)" ondragover="allowDropNode(event)" onmouseover="mouseOverNode(event)">
+          <div class="bar-zoom">
+            <i class="fas fa-search-minus" onclick="editor.zoom_out()"></i>
+            <i class="fas fa-search" onclick="editor.zoom_reset()"></i>
+            <i class="fas fa-search-plus" onclick="editor.zoom_in()"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dialog" hidden>
+    <div class="wrapper">
+      <span class="dialog-close" onclick="_dialogCloseButton_onClick(event)" title="Close window">&times;</span>
+      <div class="dialog-content" tabindex="0">
+      </div>
+    </div>
+  </div>
+  <div id="messages-bar">
+  </div>
+
+  <!-- The code of the application -->
+  <script type="text/javascript" src="js/workflows.js"></script>
+  <script type="text/javascript" src="js/env.js"></script>
+  <script type="text/javascript" src="js/htmlcontent.js"></script>
+  <script type="text/javascript" src="js/messagebox.js"></script>
+  <!-- Backend API -->
+  <script type="text/javascript" src="js/api/geodataflow.js"></script>
+  <script>
+    const drawflowDiv = document.getElementById('drawflow');
+
+    // Load Workbench.
+    const editor = new Drawflow(drawflowDiv);
+    editor.reroute = true;
+    editor.useuuid = true;
+    editor.start();
+    editor.import({ 'drawflow': { 'Home': { 'data': JSON.parse(JSON.stringify(workflows['Home'].stages[0].nodeConfig)) } } });
+    const backupWorkflows = JSON.parse(JSON.stringify(workflows));
+    var modules = {};
+
+    // Extra functions to manage data of Drawflow Nodes.
+
+    // Returns Config/Settings of specified Node.
+    editor.getNodeConfig = function(nodeId) {
+      let workflowName = editor.getModuleFromNodeId(nodeId);
+      let workflow = editor.drawflow.drawflow[workflowName];
+      return editor.drawflow.drawflow[workflowName].data[nodeId];
+    }
+
+    // Returns Geodataflow Pipeline of specified Node.
+    editor.getNodePipeline = function(nodeId, pipelineStream) {
+      let node = editor.getNodeFromId(nodeId);
+      let nodeConfig = editor.getNodeConfig(nodeId);
+      let moduleClass = nodeConfig.data.moduleClass;
+      let moduleRef = modules[moduleClass];
+
+      // Create Operation with current user parameters...
+      let nodeOp = {
+        'stageId': nodeConfig.id,
+        'type': moduleClass
+      };
+      Object.entries(moduleRef.params).forEach(function(paramEntry) {
+        let key = paramEntry[0];
+        let parameterDef = paramEntry[1];
+        let valueEntry = Object.entries(nodeConfig.data).filter(([k,v]) => k.localeCompare(key, undefined, { sensitivity: 'accent' })==0);
+        let value = valueEntry.length > 0 ? valueEntry[0][1] : parameterDef.default;
+
+        // ...replace value reference?
+        if (typeof value === 'string' && value.startsWith('$(') && value.endsWith(')')) {
+          let k = value.substring(2, value.length-1);
+          value = nodeConfig.data[k];
+        }
+        nodeOp[key] = stringAsValue(parameterDef.dataType, value);
+      });
+
+      // Inject its inputs...
+      const numInputs = Object.keys(nodeConfig.inputs).length;
+      if (numInputs > 0) {
+        let inputOps = [];
+
+        Object.values(nodeConfig.inputs).forEach(function(inputEntry) {
+          let connections = inputEntry.connections;
+
+          if (connections.length == 0) {
+            throw new Error(`The Workflow contains a "${moduleClass}" module with none Input assigned.`);
+          }
+          for (let i = 0; i < connections.length; i++) {
+            let inputNodeId = connections[i].node;
+            let inputOp = editor.getNodePipeline(inputNodeId, pipelineStream);
+            inputOp['outputStageId'] = nodeId;
+            inputOps.push(inputOp);
+          }
+          if (inputOps.length > 1) {
+            let joinOp = {
+              'stageId': editor.getUuid(),
+              'type': 'ConnectionJoin',
+              'outputStageId': nodeId,
+              'stages': inputOps.map(op => op.stageId)
+            };
+            inputOps.forEach((op) => { op['outputStageId'] = joinOp.stageId; pipelineStream.push(op); });
+            nodeOp['inputStageId'] = joinOp.stageId;
+            pipelineStream.push(joinOp);
+            // alert(JSON.stringify(joinOp, undefined, 2));
+          }
+          else {
+            inputOp = inputOps[0];
+            nodeOp['inputStageId'] = inputOp.stageId;
+            pipelineStream.push(inputOp);
+          }
+        });
+      }
+      // alert(JSON.stringify(nodeOp, undefined, 2));
+      return nodeOp;
+    }
+
+    // Create new GeoDataFlow instance for this Workbench.
+    const apiUrl = window['env']['apiUrl'];
+    const geodataflow = new GeodataFlow(apiUrl);
+    document.getElementById('_appTitleBox').textContent = geodataflow.name();
+
+    // ------------------------------------------------------------------------
+    // TODO: Implement authentication of Users.
+    // ------------------------------------------------------------------------
+
+    var user_id = undefined;
+
+    if (localStorage) {
+      user_id = localStorage.getItem('geodataflow_userid');
+
+      if (!user_id) {
+        user_id = 'user_id--' + editor.getUuid();
+        localStorage.setItem('geodataflow_userid', user_id);
+      }
+    }
+    else {
+      user_id = 'user_id--' + editor.getUuid();
+    }
+
+    // ------------------------------------------------------------------------
+    // Utility functions
+    // ------------------------------------------------------------------------
+
+    // More specific ParseInt function for HTML Input.
+    function stringAsInteger(value) {
+      if (value && value != '-') {
+        v = parseInt(value.replace(/[^0-9-]/g, ''));
+        return isNaN(v) ? 0 : v;
+      }
+      return value;
+    }
+
+    // Returns the value according to the specified DataType.
+    function stringAsValue(dataType, value) {
+      if (value === undefined) {
+        return value;
+      }
+      switch (dataType) {
+          case 'integer':
+          case 'int':
+          case 'long': {
+            if (value === '') return null;
+            return typeof value === 'number' ? parseInt(value) : stringAsInteger(value);
+          }
+          case 'float':
+          case 'double': {
+            if (value === '') return null;
+            return typeof value === 'number' ? value : parseFloat(value);
+          }
+          case 'boolean':
+          case 'bool': {
+            return value && value.toString().toLowerCase() == 'true';
+          }
+          case 'datetime':
+          case 'date':
+          case 'time': {
+            return value && (value !== '') ? value : null;
+          }
+          default: { // string and special string-based types: calc, crs...
+            return value;
+          }
+      }
+    }
+
+    // Sorts modules by path.
+    function sortModules(a, b) {
+      let fullPathA = a['category'] + '/' + a['alias'];
+      let fullPathB = b['category'] + '/' + b['alias'];
+      return fullPathA.localeCompare(fullPathB);
+    }
+
+    // Format fileSize to one human readable representation.
+    function formatBytes(bytes, decimals = 2) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    // Create Pipeline graph of operations for specified Workflow.
+    function toPipeline(workflow) {
+      let pipeline = [];
+      let writers = Object.entries(workflow).filter(([k,v]) => v.class=='writer');
+
+      // Write graph from available list of Writers.
+      writers.forEach(function(nodeEntry) {
+        let nodeId = nodeEntry[0];
+        let nodeOp = editor.getNodePipeline(nodeId, pipeline);
+        pipeline.push(nodeOp);
+      });
+      return pipeline;
+    }
+
+    // Download the specified JSON content as file.
+    function downloadFile(filename, jsonContent) {
+      const blob = new Blob([JSON.stringify(jsonContent, undefined, 2)], { type: 'text/json' });
+
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = window.URL.createObjectURL(blob);
+      link.dataset.downloadurl = ['text/json', link.download, link.href].join(':');
+
+      const evt = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      });
+      link.dispatchEvent(evt);
+      link.remove();
+    }
+
+    // ------------------------------------------------------------------------
+    // GeodataFlow
+    // ------------------------------------------------------------------------
+
+    const tocNode = document.getElementById('toc-node');
+
+    // Returns the user settings of Workflow without the HTML entries (To compare versions of settings).
+    function getSettingsOfConfig(dataConfig) {
+      let settings = {};
+
+      Object.entries(dataConfig).forEach(function(nodeEntry) {
+        let nodeId = nodeEntry[0];
+        let nodeConfig = { ...nodeEntry[1] };
+        delete nodeConfig.html;
+        nodeConfig.data = {};
+
+        Object.entries(nodeEntry[1].data).forEach(function(dataEntry) {
+          let key = dataEntry[0];
+          let val = dataEntry[1];
+          nodeConfig.data[key] = val !== undefined ? (typeof val==='object' ? JSON.stringify(val) : String(val)) : '';
+          //console.log(`${key} -> ${nodeConfig.data[key]}`)
+        });
+        settings[nodeId] = nodeConfig;
+      });
+      return settings;
+    }
+
+    // Starting to edit a Parameter of a Module.
+    function editParameterOfModule(event) {
+      let parameterDiv = event.target;
+
+      let contentDiv = parameterDiv.querySelector('.modal-content');
+      if (contentDiv) {
+        if (editor.editor_mode == 'fixed') {
+          finishEditionOfParameter({'target': contentDiv});
+        }
+        else {
+          let frameRect = drawflowDiv.getBoundingClientRect();
+          let paramRect = parameterDiv.getBoundingClientRect();
+
+          contentDiv.style.position = 'absolute';
+          contentDiv.style.left = (paramRect.left - frameRect.left - 12) + 'px';
+          contentDiv.style.top = (paramRect.top - frameRect.top - 20) + 'px';
+
+          // Configure DatePickers.
+          $(contentDiv).find('.parameter-datepicker').datepicker(
+            {
+              dateFormat: 'yy-mm-dd',
+              showOn: 'button',
+              buttonImage: 'images/calendar.png',
+              buttonImageOnly: true,
+              buttonText: 'Select date',
+              changeMonth: true,
+              changeYear: true,
+              onSelect: function(dateText) {
+                this.value = dateText;
+                editor.updateNodeValue({'target': this});
+              }
+            }
+          );
+
+          showModal(event);
+        }
+      }
+    }
+
+    // Finishing edition of a Parameter of a Module.
+    function finishEditionOfParameter(event) {
+      let element = event.target;
+      element = element.closest('.modal-content');
+      element = element.querySelector('.close');
+      closeModal({'target': element});
+
+      let nodeId = element.closest('.drawflow-node').getAttribute('id').slice(5);
+      let nodeDiv = document.getElementById('node-' + nodeId);
+      let nodeConfig = editor.getNodeConfig(nodeId);
+      nodeConfig.html = nodeDiv.querySelector('.drawflow_content_node').innerHTML;
+
+      onDataChanged('dataNodeChanged', nodeId);
+    }
+
+    // Input/Output nodes first, maybe is better for the user.
+    HtmlContent.getCategoryNode(tocNode, 'Input');
+    HtmlContent.getCategoryNode(tocNode, 'Output');
+
+    // Load TOC of supported Modules.
+    (async () => {
+      try {
+        modules = await geodataflow.modules();
+      }
+      catch (e) {
+        let errorMessage = `Failed to fetch available Modules!\n${e}`;
+        MessageBox.show(errorMessage, 'ERROR', ['OK']);
+        console.error(errorMessage);
+        return;
+      }
+
+      let moduleCount = Object.keys(modules).length;
+      document.getElementById('_runButton').disabled = moduleCount == 0;
+      document.getElementById('_requestsButton').disabled = moduleCount == 0;
+
+      Object.values(modules).sort(sortModules).forEach(function(module) {
+        let key = module['name'];
+
+        // Do not show the builtin "ConnectionJoin" Module, the exporting to Pipeline automatically will add them.
+        if (key=='ConnectionJoin') return;
+
+        let moduleType = module['type']; // 'reader', 'filter' or 'writer'
+        let alias = module['alias'];
+        let description = module['description'] ? module['description'].replaceAll('"', "'") : '';
+        let category = module['category'];
+
+        // Create HTML element of current Module.
+        let categoryNode = HtmlContent.getCategoryNode(tocNode, category);
+        let iconNode = moduleType=='filter' ? 'fas fa-tools' : (moduleType=='writer' ? 'fas fa-save' : 'fas fa-database');
+
+        let html = `
+          <div class="drag-drawflow drag-drawflow-node" draggable="true" ondragstart="dragNode(event)" data-type="${moduleType}" id="toc-module-${key}">
+            <div class="module-box">
+              <i class="${iconNode}"></i>
+              <span onmouseover="mouseOverNode(event)" toolTip="${description}"> ${alias}</span>
+            </div>
+          </div>`;
+
+        let moduleDiv = document.createElement('div');
+        moduleDiv.innerHTML = html;
+        moduleDiv.children[0].moduleRef = module;
+        categoryNode.appendChild(moduleDiv);
+      });
+
+      // Expand/Collapse Category nodes.
+      var categories = document.getElementsByClassName('category');
+
+      for (let i = 0; i < categories.length; i++) {
+        categories[i].addEventListener('click', function () {
+          this.parentElement.querySelector('.category-nested').classList.toggle('category-active');
+          this.classList.toggle('category-down');
+        });
+      }
+      categories[0].click();
+    })();
+
+    // ------------------------------------------------------------------------
+    // Toolbar/Button actions!
+    // ------------------------------------------------------------------------
+
+    // Detect & Save changes.
+    window.addEventListener('beforeunload', function(e) {
+      if (_hasPendingChanges(false)) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+    function _hasPendingChanges(showConfirmBox = true) {
+      let workflowName = editor.module;
+      let workflow = workflows[workflowName];
+      let hasChanges = workflow.stages.length > 1;
+
+      if (hasChanges && showConfirmBox) {
+        res = window.confirm('Changes you made will not be saved. Are you sure you want to continue?');
+        return !res;
+      }
+      return hasChanges;
+    }
+
+    // Create new empty workflow.
+    function _createButton_onClick(event) {
+      if (_hasPendingChanges()) {
+        return;
+      }
+      workflows = JSON.parse(JSON.stringify(backupWorkflows));
+      editor.import({ 'drawflow': { 'Home': { 'data': JSON.parse(JSON.stringify(workflows['Home'].stages[0].nodeConfig)) } } });
+
+      document.getElementById('_undoButton').disabled = true;
+      document.getElementById('_redoButton').disabled = true;
+      document.getElementById('_copyButton').disabled = true;
+    }
+
+    // Open workflow from file.
+    function _openButton_onSelected(event) {
+      let fileRef = event.files[0];
+      event.value = null;
+
+      if (_hasPendingChanges()) {
+        return;
+      }
+
+      const fileReader = new FileReader();
+      fileReader.onload = function() {
+        let fileData = fileReader.result;
+
+        try {
+          let json = JSON.parse(fileData);
+          editor.import(json);
+          workflows = JSON.parse(JSON.stringify(backupWorkflows));
+          workflows['Home'].stages[0].nodeConfig = json['drawflow']['Home'].data;
+
+          // Clean internal HTML of DataPickers, otherwise they will fail when showing.
+          $('.parameter-datepicker').each(function() {
+            $(this).removeClass('calendarclass');
+            $(this).removeClass('hasDatepicker');
+
+            let triggers = this.parentNode.getElementsByClassName('ui-datepicker-trigger');
+            while (triggers.length > 0) {
+              triggers[0].parentNode.removeChild(triggers[0]);
+            }
+          });
+
+          document.getElementById('_undoButton').disabled = true;
+          document.getElementById('_redoButton').disabled = true;
+          document.getElementById('_copyButton').disabled = true;
+        }
+        catch (e) {
+          let errorMessage = `Failed to read File!\n${e}`;
+          MessageBox.show(errorMessage, 'ERROR', ['OK']);
+        }
+      };
+      fileReader.onerror = function()
+      {
+        let errorMessage = `Failed to read File!\n${reader.error}`;
+        MessageBox.show(errorMessage, 'ERROR', ['OK']);
+      };
+      fileReader.readAsText(fileRef);
+    }
+
+    // Show Gallery of Workflows.
+    function _galleryButton_onClick(event) {
+      let html = `
+        <div class="galleryContainer">
+          <iframe src="gallery/gallery.html" width="100%" style="border:none;"></iframe>
+        </div>`;
+
+      let galleryDiv = document.createElement('div');
+      galleryDiv.innerHTML = html;
+      showModalWindow(galleryDiv);
+    }
+
+    // Save Workflow to file.
+    function _saveButton_onClick(event) {
+      let dateText = new Date().toISOString().substring(0,19).replaceAll(':','-');
+      let filename = `workflow - ${dateText}`;
+
+      let textElemId = editor.getUuid();
+      let messageDiv = document.createElement('div');
+      messageDiv.innerHTML = `
+        <div class="parameter-box">
+          <label>File name of the Workflow:</label>
+          <input type="text" class="parameter-text" value="${filename}" id="${textElemId}" />
+        </div>`;
+
+      MessageBox.show(messageDiv, 'INFO', ['OK', 'Cancel'], 'OK', function(selectedButton) {
+        if (selectedButton == 'OK') {
+          let element = document.getElementById(textElemId);
+          filename = element.value + '.gdf';
+
+          // Serialize current Workflow.
+          try {
+            let workflowName = editor.module;
+            let workflow = workflows[workflowName];
+            let fullConfig = editor.export();
+
+            downloadFile(filename, fullConfig);
+
+            // Reset.
+            workflow.stages = [workflow.stages[workflow.stageIndex]];
+            workflow.stageIndex = 0;
+            document.getElementById('_undoButton').disabled = true;
+            document.getElementById('_redoButton').disabled = true;
+          }
+          catch (e) {
+            let errorMessage = `Failed to serialize Workflow!\n\n${e}`;
+            MessageBox.show(errorMessage, 'ERROR', ['OK']);
+          }
+        }
+      });
+    }
+
+    // Save Pipeline to file.
+    function _pipelineButton_onClick(event) {
+      let dateText = new Date().toISOString().substring(0,19).replaceAll(':','-');
+      let filename = `pipeline - ${dateText}`;
+
+      let textElemId = editor.getUuid();
+      let messageDiv = document.createElement('div');
+      messageDiv.innerHTML = `
+        <div class="parameter-box">
+          <label>File name of the Pipeline:</label>
+          <input type="text" class="parameter-text" value="${filename}" id="${textElemId}" />
+        </div>`;
+
+      MessageBox.show(messageDiv, 'INFO', ['OK', 'Cancel'], 'OK', function(selectedButton) {
+        if (selectedButton == 'OK') {
+          let element = document.getElementById(textElemId);
+          filename = element.value + '.json';
+
+          // Serialize current Pipeline.
+          try {
+            let workflowName = editor.module;
+            let workflow = editor.drawflow.drawflow[workflowName].data;
+            let pipeline = { 'pipeline': toPipeline(workflow) };
+
+            downloadFile(filename, pipeline);
+          }
+          catch (e) {
+            let errorMessage = `Failed to serialize Pipeline!\n\n${e}`;
+            MessageBox.show(errorMessage, 'ERROR', ['OK']);
+          }
+        }
+      });
+    }
+
+    // Undo/Redo actions.
+    function _undoredoButton_onClick(event, stepIndex) {
+      let workflowName = editor.module;
+      let workflow = workflows[workflowName];
+
+      // Update current graph of workflow from cache.
+      workflow.stageIndex += stepIndex;
+      let fullConfig = editor.export();
+      fullConfig.drawflow[workflowName].data = workflow.stages[workflow.stageIndex].nodeConfig;
+      editor.import(fullConfig);
+
+      document.getElementById('_undoButton').disabled = workflow.stageIndex == 0;
+      document.getElementById('_redoButton').disabled = workflow.stageIndex >= workflow.stages.length - 1;
+      document.getElementById('_copyButton').disabled = true;
+    }
+
+    // Clone object.
+    function _copyButton_onClick(event) {
+      let button = event.currentTarget;
+
+      let nodeId = button.selectedNodeId;
+      let node = editor.getNodeFromId(nodeId);
+      let nodeDiv = document.getElementById('node-' + nodeId);
+
+      editor.node_selected.classList.remove('selected');
+      button.disabled = true;
+
+      // Create new Node copying "df-*" settings too...
+      editor.batchEditing = true;
+      let numInputs = Object.keys(node.inputs).length;
+      let numOutputs = Object.keys(node.outputs).length;
+      let html = '<div>' + nodeDiv.querySelector('.drawflow_content_node').firstElementChild.innerHTML + '</div>';
+      let data = { ...node.data };
+      let newNodeId = editor.addNode(node.name, numInputs, numOutputs, node.pos_x + 60, node.pos_y + 60, node.class, data, html);
+      let newNode = document.getElementById('node-' + newNodeId);
+
+      // Select new Node.
+      event = { 'target': newNode, 'type': 'mousedown', 'button': 0, 'clientX': newNode.pos_x, 'clientY': newNode.pos_y };
+      editor.click(event);
+      editor.dragEnd(event);
+
+      // Dispatch Clone event.
+      editor.batchEditing = false;
+      onDataChanged('cloneNode', newNodeId);
+    }
+
+    var runIntervalFunc = null;
+    var requestsIntervalFunc = null;
+    var requestCount = 0;
+
+    // Run the workflow.
+    function _runButton_onClick(event) {
+      let workflowName = editor.module;
+      let workflow = editor.drawflow.drawflow[workflowName].data;
+      let buttonFlag = document.getElementById('_runButtonFlag');
+
+      // Run Pipeline...
+      (async () => {
+        try {
+          requestCount += 1;
+
+          const pipeline = toPipeline(workflow);
+          const pipelineArgs = { 'packOutputs': true };
+
+          if (pipeline.length == 0) {
+            throw new Error('There is none operation to perform. Please, check the existence of Readers/Writers in your Workflow.');
+          }
+
+          if (!runIntervalFunc) {
+            runIntervalFunc = setInterval(_blinkRunButtonFlag, 1000);
+          }
+          buttonFlag.setAttribute('title', `Processing ${requestCount} requests...`);
+          buttonFlag.style.display = 'inline-block';
+
+          // Run!
+          const response = await geodataflow.run(user_id, pipeline, pipelineArgs);
+          // console.log(JSON.stringify(response));
+
+          if (!requestsIntervalFunc) {
+            requestsIntervalFunc = setInterval(_blinkRequestsButtonFlag, 1000);
+          }
+        }
+        catch (e) {
+          let errorMessage = `Failed to run Workflow!\n\n${e}`;
+          MessageBox.show(errorMessage, 'ERROR', ['OK']);
+        }
+        finally {
+          requestCount -= 1;
+
+          setTimeout(() => {
+            if (requestCount == 0) {
+              if (runIntervalFunc) { clearInterval(runIntervalFunc); runIntervalFunc = null; }
+              buttonFlag.setAttribute('title', '');
+              buttonFlag.style.display = 'none';
+            }
+          }, 1000);
+        }
+      })();
+    }
+
+    // Blinking new Request processing.
+    function _blinkRunButtonFlag() {
+      let button = document.getElementById('_runButtonFlag');
+      button.style.display = button.style.display == 'none' ? 'inline-block' : 'none';
+    }
+    // Blinking new available result of a Request.
+    function _blinkRequestsButtonFlag() {
+      let button = document.getElementById('_requestsButtonFlag');
+      button.style.display = button.style.display == 'none' ? 'inline-block' : 'none';
+    }
+
+    // Show workflows requested by current User.
+    function _requestsButton_onClick(event) {
+      let buttonFlag = document.getElementById('_requestsButtonFlag');
+
+      (async () => {
+        try {
+          const outputsPath = window['env']['outputsPath'];
+          const dataFolder = window['env']['dataFolder'];
+          const response = await geodataflow.workflows(user_id);
+
+          if (requestsIntervalFunc) {
+            clearInterval(requestsIntervalFunc);
+            requestsIntervalFunc = null;
+          }
+          buttonFlag.style.display = 'none';
+
+          let tableDiv = document.createElement('div');
+          tableDiv.innerHTML = HtmlContent.getHtmlContentOfRequestsTable(response, dataFolder, outputsPath);
+          showModalWindow(tableDiv);
+        }
+        catch (e) {
+          let errorMessage = `Failed to list Workflows!\n${e}`;
+          MessageBox.show(errorMessage, 'ERROR', ['OK']);
+        }
+      })();
+    }
+
+    // Update comments of Node.
+    function _commentTextArea_onChange(event) {
+      let textArea = event.target;
+      let nodeId = textArea.closest('.drawflow-node').getAttribute('id').slice(5);
+      onDataChanged('dataNodeChanged', nodeId);
+    }
+
+    // Show/Hide parameters panel, otherwise showing the related description of the Node.
+    function _box12_onClick(event) {
+      let button12 = event.target;
+
+      let node = button12.closest('.drawflow-node');
+      let box1 = node.querySelector('.module-box1');
+      let box2 = node.querySelector('.module-box2');
+
+      if (!box1 || !box2) {
+        return;
+      }
+      if (button12.innerHTML == '-') {
+        button12.innerHTML = '+';
+        box1.style.display = 'block';
+        box2.style.display = 'none';
+      }
+      else {
+        button12.innerHTML = '-';
+        box1.style.display = 'none';
+        box2.style.display = 'block';
+      }
+    }
+
+    // Close Dialog window.
+    function _dialogCloseButton_onClick(event) {
+      document.querySelector('.workbench').style.display = 'block';
+      document.querySelector('.dialog').style.display = 'none';
+
+      let contentDiv = document.querySelector('.dialog-content');
+      if (contentDiv.finishCallback) { contentDiv.finishCallback(contentDiv.finishCallbackArgs); }
+    }
+
+    // ------------------------------------------------------------------------
+    // Events!
+    // ------------------------------------------------------------------------
+
+    editor.on('nodeSelected', function(id) {
+      // Enable 'Clone' button.
+      if (editor.editor_mode !== 'fixed' && editor.editor_mode !== 'view') {
+        let button = document.getElementById('_copyButton');
+        button.selectedNodeId = id;
+        button.disabled = false;
+      }
+    });
+    editor.on('nodeUnselected', function(id) {
+      // Disable 'Clone' button.
+      if (editor.editor_mode !== 'fixed' && editor.editor_mode !== 'view') {
+        let button = document.getElementById('_copyButton');
+        button.selectedNodeId = null;
+        button.disabled = true;
+      }
+    });
+    ['nodeCreated', 'nodeRemoved', 'nodeMoved', 'connectionCreated', 'connectionRemoved'].forEach((eventName) => {
+      editor.on(eventName, function(event) { onDataChanged(eventName, event); });
+    });
+
+    editor.on('contextmenu', function(event) {
+      // Show 'Box12' button.
+      if (editor.node_selected) {
+        let button = editor.node_selected.querySelector('.drawflow-box12');
+        if (button) { button.style.display = 'block'; }
+      }
+    });
+    editor.on('click', function(event) {
+      // Hide 'Box12' button.
+      if (editor.node_selected && event.button === 0 && !event.target.classList.contains('drawflow-box12')) {
+        let button = editor.node_selected.querySelector('.drawflow-box12');
+        if (button) { button.style.display = 'none'; }
+      }
+    });
+
+    // Data or settings of Workflow probably changed.
+    function onDataChanged(eventName, event) {
+      if (editor.batchEditing) { return; }
+
+      let workflowName = editor.module;
+      let workflow = workflows[workflowName];
+
+      let workflowConfig = getSettingsOfConfig(workflow.stages[workflow.stageIndex].nodeConfig);
+      let editorConfig = getSettingsOfConfig(editor.drawflow.drawflow[workflowName].data);
+
+      // Data was really changed? then saving current stage.
+      if (JSON.stringify(workflowConfig) != JSON.stringify(editorConfig)) {
+        workflow.stages.push(
+          {
+            'nodeConfig': JSON.parse(JSON.stringify(editor.drawflow.drawflow[workflowName].data))
+          }
+        );
+        workflow.stageIndex = workflow.stages.length - 1;
+
+        document.getElementById('_undoButton').disabled = false;
+        document.getElementById('_redoButton').disabled = true;
+        // console.log(`DataChanged: Event="${eventName}" Data="${event}".`);
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // DrawFlow
+    // ------------------------------------------------------------------------
+
+    var mobile_item_selec = '';
+    var mobile_last_move = null;
+
+    function positionMobileNode(event) {
+      mobile_last_move = event;
+    }
+
+    function allowDropNode(event) {
+      event.preventDefault();
+    }
+
+    function dragNode(event) {
+      if (event.type === 'touchstart') {
+        mobile_item_selec = event.target.closest('.drag-drawflow').getAttribute('id');
+      }
+      else {
+        event.dataTransfer.setData('node', event.target.getAttribute('id'));
+      }
+    }
+
+    function dropNode(event) {
+      if (event.type === 'touchend') {
+        var parentdrawflow = document.elementFromPoint(mobile_last_move.touches[0].clientX, mobile_last_move.touches[0].clientY).closest('#drawflow');
+        if (parentdrawflow != null) {
+          addNodeToDrawFlow(mobile_item_selec, mobile_last_move.touches[0].clientX, mobile_last_move.touches[0].clientY);
+        }
+        mobile_item_selec = '';
+      }
+      else {
+        event.preventDefault();
+        var node = event.dataTransfer.getData('node');
+        addNodeToDrawFlow(node, event.clientX, event.clientY);
+      }
+    }
+
+    var elements = document.getElementsByClassName('drag-drawflow');
+
+    for (let i = 0; i < elements.length; i++) {
+      elements[i].addEventListener('touchstart', dragNode, false);
+      elements[i].addEventListener('touchmove', positionMobileNode, false);
+      elements[i].addEventListener('touchend', dropNode, false);
+    }
+
+    function mouseOverNode(event) {
+      toolTip = event.target.getAttribute('toolTip') || '';
+      document.getElementById('messages-bar').innerHTML = toolTip;
+    }
+
+    function addNodeToDrawFlow(moduleId, pos_x, pos_y, canvasPosition = true) {
+      var nodeId = '';
+
+      if (editor.editor_mode === 'fixed') {
+        return nodeId;
+      }
+      if (canvasPosition) {
+        cw = editor.precanvas.clientWidth;
+        ch = editor.precanvas.clientHeight;
+        pos_x = pos_x * (cw / (cw * editor.zoom)) - (editor.precanvas.getBoundingClientRect().x * (cw / (cw * editor.zoom)));
+        pos_y = pos_y * (ch / (ch * editor.zoom)) - (editor.precanvas.getBoundingClientRect().y * (ch / (ch * editor.zoom)));
+      }
+
+      let moduleDiv = document.getElementById(moduleId);
+      let moduleType = moduleDiv.getAttribute('data-type');
+      let module = moduleDiv.moduleRef;
+      var moduleClass = module ? module.name : undefined;
+      let description = module && module.description ? module.description.replaceAll('"', "'") : '';
+      let data = { 'comment': '', 'moduleClass': moduleClass };
+
+      switch (moduleType) {
+        case 'comment': {
+          var html = `
+            <div>
+              <div class="title-box"><i class="fas fa-tag"></i> Comment</div>
+              <div class="box">
+                <textarea class="module-description-area" onfocusout="_commentTextArea_onChange(event)" placeholder="Write your comments here..." df-comment></textarea>
+              </div>
+            </div>`;
+
+          nodeId = editor.addNode('comment', 0, 0, pos_x, pos_y, 'comment', data, html);
+          break;
+        }
+        case 'reader': {
+          var html = `
+            <div>
+              <div class="title-box" onmouseover="mouseOverNode(event)" toolTip="${description}"><i class="fas fa-database"></i> ${module.name}
+                <div class="drawflow-box12" onclick="_box12_onClick(event)">+</div>
+              </div>
+              <div class="box module-box1">
+                ${HtmlContent.getHtmlContentOfModule(moduleType, module, data)}
+              </div>
+              <div class="box module-box2" hidden>
+                <textarea class="module-description-area" onfocusout="_commentTextArea_onChange(event)" placeholder="Write your comments here..." df-comment></textarea>
+              </div>
+            </div>`;
+
+          nodeId = editor.addNode('reader', 0, 1, pos_x, pos_y, 'reader', data, html);
+          break;
+        }
+        case 'filter': {
+          var html = `
+            <div>
+              <div class="title-box" onmouseover="mouseOverNode(event)" toolTip="${description}"><i class="fas fa-tools"></i> ${module.name}
+                <div class="drawflow-box12" onclick="_box12_onClick(event)">+</div>
+              </div>
+              <div class="box module-box1">
+                ${HtmlContent.getHtmlContentOfModule(moduleType, module, data)}
+              </div>
+              <div class="box module-box2" hidden>
+                <textarea class="module-description-area" onfocusout="_commentTextArea_onChange(event)" placeholder="Write your comments here..." df-comment></textarea>
+              </div>
+            </div>`;
+
+          nodeId = editor.addNode('filter', 1, 1, pos_x, pos_y, 'filter', data, html);
+          break;
+        }
+        case 'writer': {
+          var html = `
+            <div>
+              <div class="title-box" onmouseover="mouseOverNode(event)" toolTip="${description}"><i class="fas fa-save"></i> ${module.name}
+                <div class="drawflow-box12" onclick="_box12_onClick(event)">+</div>
+              </div>
+              <div class="box module-box1">
+                ${HtmlContent.getHtmlContentOfModule(moduleType, module, data)}
+              </div>
+              <div class="box module-box2" hidden>
+                <textarea class="module-description-area" onfocusout="_commentTextArea_onChange(event)" placeholder="Write your comments here..." df-comment></textarea>
+              </div>
+            </div>`;
+
+          nodeId = editor.addNode('writer', 1, 0, pos_x, pos_y, 'writer', data, html);
+          break;
+        }
+        default:
+          console.log(`WARNING: The Module type "${moduleType}" is not supported!`);
+      }
+      return nodeId;
+    }
+
+    var transform = '';
+
+    function showModal(event) {
+      document.querySelector('.toolbar').classList.add('noclickable');
+      document.querySelector('.col').classList.add('noclickable');
+
+      event.target.closest('.drawflow-node').style.zIndex = '9999';
+      event.target.children[0].style.display = 'block';
+      transform = editor.precanvas.style.transform;
+      editor.precanvas.style.transform = '';
+      editor.precanvas.style.left = editor.canvas_x + 'px';
+      editor.precanvas.style.top = editor.canvas_y + 'px';
+      editor.editor_mode = 'fixed';
+    }
+
+    function closeModal(event) {
+      document.querySelector('.toolbar').classList.remove('noclickable');
+      document.querySelector('.col').classList.remove('noclickable');
+
+      event.target.closest('.drawflow-node').style.zIndex = '2';
+      event.target.closest('.modal-node').style.display = 'none';
+      editor.precanvas.style.transform = transform;
+      editor.precanvas.style.left = '0px';
+      editor.precanvas.style.top = '0px';
+      editor.editor_mode = 'edit';
+    }
+
+    function showModalWindow(childContentDiv, finishCallback = undefined, finishCallbackArgs = []) {
+      let workbenchDiv = document.querySelector('.workbench');
+      let dialogDiv = document.querySelector('.dialog');
+      let contentDiv = dialogDiv.querySelector('.dialog-content');
+
+      contentDiv.innerHTML = '';
+      contentDiv.appendChild(childContentDiv);
+      contentDiv.finishCallbackArgs = finishCallbackArgs;
+      contentDiv.finishCallback = finishCallback;
+
+      workbenchDiv.style.display = 'none';
+      dialogDiv.style.display = 'block';
+    }
+
+  </script>
+</body>
+</html>

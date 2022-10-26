@@ -1,0 +1,54 @@
+{
+  "pipeline": [
+    # Read Features from embedded GeoJson FeatureCollection.
+    {
+        "type": "FeatureReader",
+
+        "connectionString": {
+          "type": "FeatureCollection",
+          "crs": {
+            "type": "name",
+            "properties": { "name": "EPSG:4326" }
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": { "id": 0, "name": "My AOI for testing" },
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[-1.616364,42.825876],[-1.616364,42.835696],[-1.598854,42.835696],[-1.598854,42.825876],[-1.616364,42.825876]]]
+              }
+            }
+          ]
+        }
+    },
+    # Fetch raster of EO Products (STAC provider) that match one SpatioTemporial criteria.
+    {
+      "type": "EOProductDataset",
+
+      # Input parameters for "EOProductCatalog".
+      "driver": "STAC",
+      "provider": "https://earth-search.aws.element84.com/v0/search",
+      "product": "sentinel-s2-l2a-cogs",
+
+      "startDate": "2021-09-25",
+      "endDate": "2021-10-05",
+      "closestToDate": "2021-09-30",
+      "filter": "",
+
+      "preserveInputCrs": true,
+
+      # Input parameters for "EOProductDataset".
+      "configVars": "AWS_NO_SIGN_REQUEST=YES",
+      "bands": ["B04", "B08"],
+      "groupByDate": true,
+      "clipByAreaOfInterest": true
+    },
+    # Save Raster to Gtiff.
+    {
+      "type": "RasterWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.tif",
+      "formatOptions": [ "-of", "Gtiff", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "PREDICTOR=2" ]
+    }
+  ]
+}

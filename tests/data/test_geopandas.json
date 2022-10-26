@@ -1,0 +1,27 @@
+{
+  "pipeline": [
+    # Read Features from GeoPackage.
+    {
+      "type": "FeatureReader",
+      "connectionString": "${TEST_DATA_PATH}/S2L2A-grid-sample.gpkg"
+    },
+    # Collect input Features into a GeoPandas Dataframe.
+    {
+      "type": "TablePack"
+    },
+    # Doing my own operations with input GeoPandas Dataframe.
+    {
+      "type": "TableQuery",
+      "expression": "tileId == '30TXM'"
+    },
+    # Extract Features of input GeoPandas Dataframe.
+    {
+      "type": "TableUnpack"
+    },
+    # Save Features to GeoPackage.
+    {
+      "type": "FeatureWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.gpkg"
+    }
+  ]
+}

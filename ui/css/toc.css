@@ -1,0 +1,41 @@
+/* Remove margins and padding from the parent ul */
+#toc-tree {
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove default bullets */
+ul, #toc-tree {
+  list-style-type: none;
+}
+
+/* Style the category/arrow */
+.category {
+  line-height: 40px;
+  padding-left: 22px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Create the category/arrow with a unicode, and style it */
+.category::before {
+  content: "\25B6";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+/* Rotate the category/arrow icon when clicked on (using JavaScript) */
+.category-down::before {
+  transform: rotate(90deg);
+}
+
+/* Hide the nested list */
+.category-nested {
+  display: none;
+}
+
+/* Show the nested list when the user clicks on the category/arrow (with JavaScript) */
+.category-active {
+  display: block;
+}

@@ -1,0 +1,12 @@
+include AUTHORS.rst
+include CHANGES.rst
+include LICENSE
+include NOTICE
+include README.md
+include requirements.txt
+exclude MANIFEST.in
+
+recursive-exclude tests *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-include geodataflow *.py

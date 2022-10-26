@@ -1,0 +1,44 @@
+GeodataFlow:
+Toolkit to run workflows on Geospatial & Earth Observation (EO) data.
+
+Copyright (c) 2022, Alvaro Huarte. All rights reserved.
+
+This software is distributed under the Apache Software License (ASL) v2.0, see LICENSE
+file or http://www.apache.org/licenses/LICENSE-2.0 for details.
+
+This software includes code from many other open source projects. See below for details
+about the license of each project.
+
+================================================================
+The Apache 2.0 License
+================================================================
+
+The following components are provided under the Apache 2.0 License (https://opensource.org/licenses/Apache-2.0).
+See project link for details.
+
+https://github.com/requests/requests
+https://github.com/CS-SI/eodag
+
+================================================================
+The MIT License
+================================================================
+
+The following components are provided under the MIT License (http://www.opensource.org/licenses/mit-license.php).
+See project link for details.
+
+https://github.com/pyproj4/pyproj
+https://github.com/OSGeo/gdal
+https://github.com/jerosoler/Drawflow
+https://github.com/tiangolo/fastapi
+
+================================================================
+The BSD-3-Clause Licence
+================================================================
+
+The following components are provided under the BSD-3-Clause License (https://opensource.org/licenses/BSD-3-Clause).
+See project link for details.
+
+https://github.com/numpy/numpy
+https://github.com/pandas-dev/pandas
+https://github.com/shapely/shapely
+https://github.com/geopandas/geopandas

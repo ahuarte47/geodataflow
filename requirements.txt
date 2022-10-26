@@ -1,0 +1,8 @@
+# This file specifies requirements of a reproducible environment to run GeodataFlow.
+numpy
+requests
+pyproj==3.3.0
+shapely==1.7.1
+GDAL
+pandas==1.2.1
+geopandas==0.8.2

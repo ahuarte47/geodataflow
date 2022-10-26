@@ -1,0 +1,146 @@
+
+/* Elements embedded in Dialog frame  */
+
+.dialog-content {
+  width: 100%;
+  border: #cacaca solid 1px;
+  background-color: rgba(0,0,0,0.7);
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.dialog-close {
+  position: absolute;
+  top: 6px;
+  right: 20px;
+  font-size: 50px;
+  color: black;
+  cursor: pointer;
+  user-select: none; /* Prevent text selection */
+}
+.dialog-close:hover {
+  color: #555555;
+}
+
+/* Elements embedded in generic modal Window */
+
+.modal-window-area {
+  position: absolute;
+  padding: 20px 20px 20px 20px;
+  left: 50%;
+  top: 50%;
+  width: 500px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #e5e5e5;
+  border-radius: 4px;
+  border: 1px solid #555555;
+  box-shadow: 0 2px 15px 2px var(--border-color);
+}
+.modal-window-area.active {
+  border: 3px dashed #22598c;
+}
+
+.modal-window-area .icon {
+  font-size: 80px;
+  color: #22598c;
+}
+.modal-window-area p {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border-top: 1px solid #22598c;
+  padding: 0px 240px 0px 240px;
+  font-size: 10px;
+}
+.modal-window-area label {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  white-space: pre-wrap;
+  font-size: 20px;
+  color: #22598c;
+}
+.modal-window-area input {
+  padding: 4px 4px 4px 4px;
+  font-size: 16px;
+  color: #22598c;
+}
+.modal-window-area span {
+  font-size: 25px;
+  font-weight: 500;
+  color: #22598c;
+  margin: 10px 0 15px 0;
+}
+.modal-window-area button {
+  margin: 0px 20px 0px 20px;
+  padding: 10px 25px;
+  font-size: 20px;
+  font-weight: 500;
+  border: none;
+  outline: none;
+  background: #22598c;
+  color: #f1f1f1;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.modal-window-area .default-button {
+  background: #0a3663;
+}
+.modal-window-area button:hover {
+  background-color: #3e6a94;
+}
+.modal-window-area img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.modal-window-row{
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.modal-window-col {
+  padding: 20px 10px 20px 10px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Elements embedded in Leaflet map */
+
+#parameter-map {
+  height: 100%;
+}
+
+.leaflet-editing-icon {
+  width: 10px !important;
+  height: 10px !important;
+  background-color: #90c7fa !important;
+}
+
+/* Elements embedded in Upload file box */
+
+.upload-file-area {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.upload-file-area .icon {
+  font-size: 20px;
+  color: #22598c;
+}
+.upload-file-area .data {
+  padding-top: 6px;
+  padding-left: 10px;
+  font-size: 20px;
+}
+.upload-file-area .close {
+  cursor: pointer;
+  padding-top: 6px;
+  padding-left: 10px;
+  color: red;
+}

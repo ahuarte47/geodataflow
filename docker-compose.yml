@@ -1,0 +1,70 @@
+version: "3.8"
+
+# =============================================================================
+# docker-compose file for creating the GeodataFlow services stack in Docker.
+#
+# @Usage:
+#  sudo docker compose up
+#  sudo docker compose down --rmi all -v --remove-orphans
+#
+# =============================================================================
+
+services:
+
+  # GeodataFlow WebAPI.
+  api:
+    container_name: geodataflow-api
+
+    image: geodataflow/pipelineapi:1.0.0
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+
+    environment:
+      # Folder where GeodataFlow saves outputs.
+      - GEODATAFLOW_OUTPUT_FOLDER_PREFIX=/var/lib/geodataflow/data
+      # CORS Origins.
+      - GEODATAFLOW_API_ORIGINS=http://localhost:9640
+      # Connection string of backend Database.
+      - GEODATAFLOW_DATABASE_URL=sqlite+aiosqlite:////var/lib/geodataflow/data/geodataflow.db
+
+    volumes:
+      - data-volume:/var/lib/geodataflow/data
+
+    ports:
+      - "9630:9630"
+
+    restart: always
+    network_mode: "host"
+
+  # GeodataFlow Workbench UI.
+  ui:
+    container_name: geodataflow-ui
+
+    depends_on:
+      - api
+
+    image: geodataflow/workbench:1.0.0
+    build:
+      context: .
+      dockerfile: ./ui/Dockerfile
+
+    environment:
+      # Nginx location of outputs.
+      - GEODATAFLOW_WORKBENCH_OUTPUT_PATH_PREFIX=/outputs
+      # Folder where GeodataFlow saves outputs.
+      - GEODATAFLOW_OUTPUT_FOLDER_PREFIX=/var/lib/geodataflow/data
+      # GeodataFlow WebAPI.
+      - GEODATAFLOW_API_URL=http://localhost:9630/api
+
+    ports:
+      - "9640:9640"
+
+    volumes:
+      - data-volume:/var/lib/geodataflow/data
+
+    restart: always
+    network_mode: "host"
+
+volumes:
+  data-volume:

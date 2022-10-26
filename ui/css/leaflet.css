@@ -1,0 +1,6 @@
+
+/* Elements embedded in Leaflet */
+
+.leaflet-container .leaflet-control-mouseposition {
+  font: 16px/1.5 "Helvetica Neue", Arial, Helvetica, sans-serif;
+}

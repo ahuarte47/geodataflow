@@ -1,0 +1,49 @@
+{
+  "pipeline": [
+    # Read Features from embedded GeoJson FeatureCollection.
+    {
+        "type": "FeatureReader",
+        "stageId": "my-stage-0",
+
+        "connectionString": {
+          "type": "FeatureCollection",
+          "crs": {
+            "type": "name",
+            "properties": { "name": "EPSG:4326" }
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": { "id": 0, "name": "My AOI for testing" },
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[-1.746826,42.773227],[-1.746826,42.860866],[-1.558685,42.860866],[-1.558685,42.773227],[-1.746826,42.773227]]]
+              }
+            }
+          ]
+        }
+    },
+    # Fetch footprints of EO Products (STAC provider) that match one SpatioTemporial criteria.
+    {
+      "type": "EOProductCatalog",
+      "stageId": "my-stage-1",
+
+      "driver": "STAC",
+      "provider": "https://earth-search.aws.element84.com/v0/search",
+      "product": "sentinel-s2-l2a-cogs",
+
+      "startDate": "2021-09-25",
+      "endDate": "2021-10-05",
+      "closestToDate": "2021-09-30",
+      "filter": "",
+
+      "preserveInputCrs": true
+    },
+    # Save Features to GeoPackage.
+    {
+      "type": "FeatureWriter",
+      "stageId": "my-stage-2",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.gpkg"
+    }
+  ]
+}
