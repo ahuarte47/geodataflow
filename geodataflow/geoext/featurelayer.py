@@ -86,33 +86,35 @@ class OgrFeatureLayer(object):
         pass
 
     @staticmethod
+    def create_spatial_reference(schema_def: SchemaDef) -> "osr.SpatialReference":
+        """
+        Creates an `osr.SpatialReference` from the specified SchemaDef.
+        """
+        spatial_ref = osr.SpatialReference()
+
+        if hasattr(spatial_ref, 'SetAxisMappingStrategy'):
+            spatial_ref.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+        if schema_def.srid > 0:
+            spatial_ref.ImportFromEPSG(schema_def.srid)
+        elif schema_def.crs:
+            crs = schema_def.crs
+
+            spatial_ref.ImportFromEPSG(crs.to_epsg()) \
+                if crs.to_epsg() else spatial_ref.ImportFromWkt(crs.to_wkt())
+        else:
+            spatial_ref.ImportFromEPSG(4326)
+
+        return spatial_ref
+
+    @staticmethod
     def create_layer(connection_string: str, layer_name: str, schema_def: SchemaDef) -> "OgrFeatureLayer":
         """
         Creates a new OGR FeatureLayer from the specified SchemaDef.
         """
         driver = GdalUtils.get_ogr_driver(connection_string)
         geometry_type = schema_def.geometryType
-        crs = schema_def.crs
-
-        if schema_def.srid > 0:
-            spatial_ref = osr.SpatialReference()
-            if hasattr(spatial_ref, 'SetAxisMappingStrategy'):
-                spatial_ref.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-            spatial_ref.ImportFromEPSG(schema_def.srid)
-        elif crs:
-            spatial_ref = osr.SpatialReference()
-            if hasattr(spatial_ref, 'SetAxisMappingStrategy'):
-                spatial_ref.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-            spatial_ref.ImportFromEPSG(crs.to_epsg()) \
-                if crs.to_epsg() else spatial_ref.ImportFromWkt(crs.to_wkt())
-        else:
-            spatial_ref = osr.SpatialReference()
-            if hasattr(spatial_ref, 'SetAxisMappingStrategy'):
-                spatial_ref.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-
-            spatial_ref.ImportFromEPSG(4326)
+        spatial_ref = OgrFeatureLayer.create_spatial_reference(schema_def)
 
         # Remove old existing FeatureStore.
         try:

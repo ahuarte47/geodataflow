@@ -38,6 +38,7 @@ import logging
 import json
 import uuid
 import base64
+import inspect
 from collections import OrderedDict
 from typing import Any, Callable, Dict, Iterable, List, Set, Tuple, Union, Type
 
@@ -374,59 +375,13 @@ class PipelineManager:
         pass
 
     @staticmethod
-    def _parse_pipeline_objects(manager: PipelineModuleManager,
-                                modules: Dict[str, Type],
-                                pipeline: Iterable[Dict],
-                                pipeline_args: Dict[str, str] = dict()) -> List[AbstractModule]:
+    def _reassign_parameters_objects(
+            manager: PipelineModuleManager,
+            objects: List[AbstractModule],
+            pipeline_args: Dict[str, str] = dict()) -> List[AbstractModule]:
         """
-        Parse the specified operation settings of a deserialized Pipeline.
+        Reassign parameters of operations.
         """
-        objects: List[AbstractModule] = list()
-        temp_args = {k: v for k, v in pipeline_args.items() if k.startswith('--') or not k.startswith('-')}
-
-        # Create the operation object collection of the pipeline.
-        for settings in pipeline:
-            type_name = settings['type']
-
-            type_parts = type_name.split('.')
-            class_name = type_parts[len(type_parts)-1]
-            type_def = modules.get(type_name.lower()) or modules.get(class_name.lower())
-
-            # ... does this object provide the Path where the Python file is located?
-            if type_def is None and settings.get('moduleLocation'):
-                script_file = settings.get('moduleLocation')
-
-                if not os.path.exists(script_file):
-                    script_file = os.path.join(os.path.dirname(__file__), script_file)
-
-                import inspect
-                type_def = ModuleManager.import_type_from_file(script_file, class_name, inspect.isclass)
-
-            if type_def is None:
-                raise Exception('The Module type "{}" is not supported!'.format(settings['type']))
-
-            obj = type_def()
-            obj.ti_ = type('TreeMetadata', (object,), {
-                'parent': None, 'children': [], 'inputs': OrderedDict(), 'outputs': OrderedDict()
-            })
-
-            for key, value in settings.items():
-                if key not in ['type', 'pipeline']:
-                    setattr(obj, key, value)
-
-            if settings.get('pipeline'):
-                children_pipeline = settings.get('pipeline')
-                children = \
-                    PipelineManager._parse_pipeline_objects(manager, modules, children_pipeline, temp_args)
-
-                for child in children:
-                    child.ti_.parent = obj
-
-                obj.ti_.children = children
-
-            objects.append(obj)
-
-        # Reassign parameters of operations.
         for key, value in pipeline_args.items():
             #
             if key in ['-source', '-i', '-input']:
@@ -467,6 +422,64 @@ class PipelineManager:
                             setattr(obj, attribute_name, new_value)
                         else:
                             setattr(obj, attribute_name, value)
+
+        return objects
+
+    @staticmethod
+    def _parse_pipeline_objects(manager: PipelineModuleManager,
+                                modules: Dict[str, Type],
+                                pipeline: Iterable[Dict],
+                                pipeline_args: Dict[str, str] = dict()) -> List[AbstractModule]:
+        """
+        Parse the specified operation settings of a deserialized Pipeline.
+        """
+        objects: List[AbstractModule] = list()
+        temp_args = {k: v for k, v in pipeline_args.items() if k.startswith('--') or not k.startswith('-')}
+
+        # Create the operation object collection of the pipeline.
+        for settings in pipeline:
+            type_name = settings['type']
+
+            type_parts = type_name.split('.')
+            class_name = type_parts[len(type_parts)-1]
+            type_def = modules.get(type_name.lower()) or modules.get(class_name.lower())
+
+            # ... does this object provide the Path where the Python file is located?
+            if type_def is None and settings.get('moduleLocation'):
+                script_file = settings.get('moduleLocation')
+
+                if not os.path.exists(script_file):
+                    script_file = os.path.join(os.path.dirname(__file__), script_file)
+
+                type_def = ModuleManager.import_type_from_file(script_file, class_name, inspect.isclass)
+
+            if type_def is None:
+                raise Exception('The Module type "{}" is not supported!'.format(settings['type']))
+
+            obj = type_def()
+            obj.ti_ = type('TreeMetadata', (object,), {
+                'parent': None, 'children': [], 'inputs': OrderedDict(), 'outputs': OrderedDict()
+            })
+
+            for key, value in settings.items():
+                if key not in ['type', 'pipeline']:
+                    setattr(obj, key, value)
+
+            if settings.get('pipeline'):
+                children_pipeline = settings.get('pipeline')
+                children = \
+                    PipelineManager._parse_pipeline_objects(manager, modules, children_pipeline, temp_args)
+
+                for child in children:
+                    child.ti_.parent = obj
+
+                obj.ti_.children = children
+
+            objects.append(obj)
+
+        # Reassign parameters of operations.
+        objects = \
+            PipelineManager._reassign_parameters_objects(manager, objects, pipeline_args)
 
         # Fix some possible bad settings.
         for obj in objects:
@@ -621,7 +634,6 @@ class PipelineManager:
             return False
 
         set_of_objects = [obj for obj in self.objects(recursive=True)]
-        this_manager = self
 
         if self._pipeline_dir:
             os.environ['PIPELINE_FOLDER'] = self._pipeline_dir
@@ -638,53 +650,6 @@ class PipelineManager:
             if not writers:
                 logging.warning('There is none Output node, the Pipeline does nothing!')
                 return False
-
-            def my_starting_run_function(module_obj: AbstractModule,
-                                         function_args: Any) -> Tuple[SchemaDef, AbstractModule]:
-                """
-                Prepare of task metadata of each Pipeline Operation.
-                """
-                input_function_args = function_args
-                input_schemas = []
-
-                # Calling before to the tree of inputs.
-                for obj in module_obj.ti_.inputs.values():
-                    function_args = my_starting_run_function(obj, input_function_args)
-                    input_schemas.append(function_args[0])
-
-                if hasattr(module_obj, 'pipeline_args'):
-                    return [module_obj.pipeline_args.schema_def, module_obj.pipeline_args.data_source]
-                if len(input_schemas) > 1:
-                    function_args[0] = SchemaDef.merge_all(input_schemas)
-                if module_obj.className == 'ConnectionJoin':
-                    function_args[1] = None
-
-                # Assign metadata for using when the Pipeline runs.
-                schema_def = function_args[0]
-                parent_obj = function_args[1]
-                schema_def = module_obj.starting_run(schema_def, this_manager, processing_args)
-
-                setattr(module_obj, 'pipeline_args', type('PipelineArgs', (object,), {
-                    'config': this_manager.config,
-                    'pipeline': this_manager,
-                    'data_source': parent_obj,
-                    'schema_def': schema_def,
-                    'processing_args': processing_args
-                })())
-                return [schema_def, module_obj]
-
-            def my_finished_run_function(module_obj: AbstractModule) -> AbstractModule:
-                """
-                Finalization of task for each Pipeline operation.
-                """
-                if hasattr(module_obj, 'pipeline_args'):
-                    module_obj.finished_run(self, processing_args)
-                    delattr(module_obj, 'pipeline_args')
-
-                for obj in module_obj.ti_.inputs.values():
-                    my_finished_run_function(obj)
-
-                return module_obj
 
             # Redefine 'connectionString' of Readers, when defining embebed fileData.
             for reader in readers:
@@ -707,7 +672,7 @@ class PipelineManager:
 
             # Run workflow, like one IEnumerable stream!
             for writer in writers:
-                my_starting_run_function(writer, [None, None])
+                self._invoke_starting_run(writer, [None, None], processing_args)
 
                 for feature in writer:
                     if callback:
@@ -715,7 +680,7 @@ class PipelineManager:
 
                     feature = None
 
-                my_finished_run_function(writer)
+                self._invoke_finished_run(writer, processing_args)
 
             return True
         finally:
@@ -731,3 +696,52 @@ class PipelineManager:
                 sys.path.remove(self._pipeline_dir)
 
         return False
+
+    def _invoke_starting_run(
+            self,
+            module_obj: AbstractModule,
+            function_args: Any, processing_args) -> Tuple[SchemaDef, AbstractModule]:
+        """
+        Prepare of task metadata of each Pipeline Operation.
+        """
+        input_function_args = function_args
+        input_schemas = []
+
+        # Calling before to the tree of inputs.
+        for obj in module_obj.ti_.inputs.values():
+            function_args = self._invoke_starting_run(obj, input_function_args, processing_args)
+            input_schemas.append(function_args[0])
+
+        if hasattr(module_obj, 'pipeline_args'):
+            return [module_obj.pipeline_args.schema_def, module_obj.pipeline_args.data_source]
+        if len(input_schemas) > 1:
+            function_args[0] = SchemaDef.merge_all(input_schemas)
+        if module_obj.className == 'ConnectionJoin':
+            function_args[1] = None
+
+        # Assign metadata for using when the Pipeline runs.
+        schema_def = function_args[0]
+        parent_obj = function_args[1]
+        schema_def = module_obj.starting_run(schema_def, self, processing_args)
+
+        setattr(module_obj, 'pipeline_args', type('PipelineArgs', (object,), {
+            'config': self.config,
+            'pipeline': self,
+            'data_source': parent_obj,
+            'schema_def': schema_def,
+            'processing_args': processing_args
+        })())
+        return [schema_def, module_obj]
+
+    def _invoke_finished_run(self, module_obj: AbstractModule, processing_args) -> AbstractModule:
+        """
+        Finalization of task for each Pipeline operation.
+        """
+        if hasattr(module_obj, 'pipeline_args'):
+            module_obj.finished_run(self, processing_args)
+            delattr(module_obj, 'pipeline_args')
+
+        for obj in module_obj.ti_.inputs.values():
+            self._invoke_finished_run(obj, processing_args)
+
+        return module_obj
