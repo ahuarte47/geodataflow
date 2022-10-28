@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9"]
+        python-version: ["3.8", "3.9", "3.10"]
 
     steps:
       - uses: actions/checkout@v3
@@ -22,12 +22,12 @@ jobs:
           sudo add-apt-repository -y ppa:ubuntugis/ppa
           sudo apt-get update
           sudo apt-get install -y gdal-bin libgdal-dev
-          python -m pip install numpy==1.22.4
+          python -m pip install numpy
           python -m pip install GDAL==$(gdal-config --version)
+          python -m pip install flake8 pytest
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           sudo add-apt-repository -y --remove ppa:ubuntugis/ppa
           sudo apt-get update
-          pip install flake8 pytest
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
