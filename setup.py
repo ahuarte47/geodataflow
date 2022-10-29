@@ -80,8 +80,8 @@ setup(
         'console_scripts': ['geodataflow = geodataflow.pipelineapp:pipeline_app']
     },
     project_urls={
-        'Bug Tracker': 'https://github.com/ahuart47/geodataflow/issues/',
-        'Source Code': 'https://github.com/ahuart47/geodataflow'
+        'Bug Tracker': 'https://github.com/ahuarte47/geodataflow/issues/',
+        'Source Code': 'https://github.com/ahuarte47/geodataflow'
     },
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

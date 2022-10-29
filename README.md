@@ -78,6 +78,12 @@ Developers can extend **GeodataFlow** with new custom modules as well.
           ]
         }
       },
+      # Transform CRS of geometries.
+      {
+        "type": "GeometryTransform",
+        "sourceCrs": 4326,
+        "targetCrs": 32630
+      },
       # Fetch metadata of EO Products that match one SpatioTemporial criteria.
       {
         "type": "EOProductCatalog",
@@ -93,16 +99,9 @@ Developers can extend **GeodataFlow** with new custom modules as well.
 
         "preserveInputCrs": true
       },
-      # Transform CRS of geometries.
-      {
-        "type": "GeometryTransform",
-        "sourceCrs": 4326,
-        "targetCrs": 32630
-      },
       # Save features to Geopackage.
       {
         "type": "FeatureWriter",
-        "mode": "CREATE",
         "connectionString": "output.gpkg"
       }
     ]
