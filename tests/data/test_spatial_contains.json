@@ -1,0 +1,24 @@
+{
+  "pipeline": [
+    {
+      "type": "FeatureReader",
+      "stageId": "input-A",
+      "connectionString": "${TEST_DATA_PATH}/S2L2A-grid-sample.gpkg"
+    },
+    {
+      "type": "FeatureReader",
+      "stageId": "input-B",
+      "connectionString": "${TEST_DATA_PATH}/feature-collection-sample.geojson"
+    },
+    {
+      "type": "SpatialRelation",
+      "inputStageId": "input-A",
+      "relationship": "Contains",
+      "otherGeometries": "input-B"
+    },
+    {
+      "type": "FeatureWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.geojson"
+    }
+  ]
+}

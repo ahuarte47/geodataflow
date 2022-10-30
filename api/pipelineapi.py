@@ -236,7 +236,7 @@ async def new_workflow(
 
             # Run!
             if get_schema:
-                schema_def = pipeline_ob.getSchema(processing_args, payload.input_args.get('stageId'))
+                schema_def = pipeline_ob.get_schema(processing_args, payload.input_args.get('stageId'))
                 report_context.info['schema'] = schema_def
             else:
                 pipeline_ob.run(processing_args)

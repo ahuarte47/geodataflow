@@ -481,13 +481,13 @@
       Object.values(modules).sort(sortModules).forEach(function(module) {
         let key = module['name'];
 
-        // Do not show the builtin "ConnectionJoin" Module, the exporting to Pipeline automatically will add them.
-        if (key=='ConnectionJoin') return;
-
         let moduleType = module['type']; // 'reader', 'filter' or 'writer'
         let alias = module['alias'];
         let description = module['description'] ? module['description'].replaceAll('"', "'") : '';
         let category = module['category'];
+
+        // Do not show the Graph-type Modules, but the exporting to Pipeline can automatically add them.
+        if (category=='Graph') return;
 
         // Create HTML element of current Module.
         let categoryNode = HtmlContent.getCategoryNode(tocNode, category);

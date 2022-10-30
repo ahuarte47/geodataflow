@@ -543,7 +543,7 @@ class PipelineManager:
         self._build_tree_pipeline()
         return self._objects
 
-    def getSchema(self, processing_args, stageId: str) -> bool:
+    def get_schema(self, processing_args, stageId: str) -> bool:
         """
         Get the Schema of a Stage in the specified pipeline of Geospatial data.
         """

@@ -80,7 +80,7 @@ class TestGeodataFlow(unittest.TestCase):
             # Load workflow & Get Schema.
             pipeline = PipelineManager(config=app_settings, custom_modules_path=custom_modules_path)
             pipeline.load_from_file(pipeline_file, pipeline_args)
-            rs = pipeline.getSchema(processing_args, stageId)
+            rs = pipeline.get_schema(processing_args, stageId)
             return rs
 
     def process_pipeline(self, pipeline_file: str, pipeline_args: Dict[str, str] = {}) -> Iterable:
@@ -325,6 +325,46 @@ class TestGeodataFlow(unittest.TestCase):
         self.assertIsNotNone(schema_def)
         schema_def = self.schema_of_stage(pipeline_file, 'my-stage-2')
         self.assertIsNotNone(schema_def)
+        pass
+
+    def test_spatial_intersects(self):
+        """
+        Test reading the Schema of a Stage.
+        """
+        pipeline_file = os.path.join(DATA_FOLDER, 'test_spatial_intersects.json')
+        features = list(self.process_pipeline(pipeline_file))
+
+        self.assertEqual(len(features), 2)
+        pass
+
+    def test_spatial_contains(self):
+        """
+        Test reading the Schema of a Stage.
+        """
+        pipeline_file = os.path.join(DATA_FOLDER, 'test_spatial_contains.json')
+        features = list(self.process_pipeline(pipeline_file))
+
+        self.assertEqual(len(features), 1)
+        pass
+
+    def test_spatial_disjoint(self):
+        """
+        Test reading the Schema of a Stage.
+        """
+        pipeline_file = os.path.join(DATA_FOLDER, 'test_spatial_disjoint.json')
+        features = list(self.process_pipeline(pipeline_file))
+
+        self.assertEqual(len(features), 2)
+        pass
+
+    def test_spatial_within(self):
+        """
+        Test reading the Schema of a Stage.
+        """
+        pipeline_file = os.path.join(DATA_FOLDER, 'test_spatial_within.json')
+        features = list(self.process_pipeline(pipeline_file))
+
+        self.assertEqual(len(features), 0)
         pass
 
 
