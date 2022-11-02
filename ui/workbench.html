@@ -200,6 +200,7 @@
       let nodeConfig = editor.getNodeConfig(nodeId);
       let moduleClass = nodeConfig.data.moduleClass;
       let moduleRef = modules[moduleClass];
+      let inputIndex = 0;
 
       // Create Operation with current user parameters...
       let nodeOp = {
@@ -209,52 +210,68 @@
       Object.entries(moduleRef.params).forEach(function(paramEntry) {
         let key = paramEntry[0];
         let parameterDef = paramEntry[1];
-        let valueEntry = Object.entries(nodeConfig.data).filter(([k,v]) => k.localeCompare(key, undefined, { sensitivity: 'accent' })==0);
-        let value = valueEntry.length > 0 ? valueEntry[0][1] : parameterDef.default;
 
-        // ...replace value reference?
-        if (typeof value === 'string' && value.startsWith('$(') && value.endsWith(')')) {
-          let k = value.substring(2, value.length-1);
-          value = nodeConfig.data[k];
+        if (parameterDef.dataType == 'input') {
+          let value = '';
+          let connections = nodeConfig.inputs[`input_${inputIndex+2}`].connections;
+          inputIndex++;
+
+          if (connections.length == 0) {
+            throw new Error(`The Workflow contains a "${key}" parameter with none Input assigned.`);
+          }
+          for (let i = 0; i < connections.length; i++) {
+            let inputNodeId = connections[i].node;
+            value = value.length > 0 ? ',' + inputNodeId : inputNodeId;
+            let inputOp = editor.getNodePipeline(inputNodeId, pipelineStream);
+            pipelineStream.push(inputOp);
+          }
+          nodeOp[key] = value;
         }
-        nodeOp[key] = stringAsValue(parameterDef.dataType, value);
+        else {
+          let valueEntry = Object.entries(nodeConfig.data).filter(([k,v]) => k.localeCompare(key, undefined, { sensitivity: 'accent' })==0);
+          let value = valueEntry.length > 0 ? valueEntry[0][1] : parameterDef.default;
+
+          // ...replace value reference?
+          if (typeof value === 'string' && value.startsWith('$(') && value.endsWith(')')) {
+            let k = value.substring(2, value.length-1);
+            value = nodeConfig.data[k];
+          }
+          nodeOp[key] = stringAsValue(parameterDef.dataType, value);
+        }
       });
 
       // Inject its inputs...
       const numInputs = Object.keys(nodeConfig.inputs).length;
       if (numInputs > 0) {
         let inputOps = [];
+        let connections = nodeConfig.inputs['input_1'].connections;
 
-        Object.values(nodeConfig.inputs).forEach(function(inputEntry) {
-          let connections = inputEntry.connections;
-
-          if (connections.length == 0) {
-            throw new Error(`The Workflow contains a "${moduleClass}" module with none Input assigned.`);
-          }
-          for (let i = 0; i < connections.length; i++) {
-            let inputNodeId = connections[i].node;
-            let inputOp = editor.getNodePipeline(inputNodeId, pipelineStream);
-            inputOp['outputStageId'] = nodeId;
-            inputOps.push(inputOp);
-          }
-          if (inputOps.length > 1) {
-            let joinOp = {
-              'stageId': editor.getUuid(),
-              'type': 'ConnectionJoin',
-              'outputStageId': nodeId,
-              'stages': inputOps.map(op => op.stageId)
-            };
-            inputOps.forEach((op) => { op['outputStageId'] = joinOp.stageId; pipelineStream.push(op); });
-            nodeOp['inputStageId'] = joinOp.stageId;
-            pipelineStream.push(joinOp);
-            // alert(JSON.stringify(joinOp, undefined, 2));
-          }
-          else {
-            inputOp = inputOps[0];
-            nodeOp['inputStageId'] = inputOp.stageId;
-            pipelineStream.push(inputOp);
-          }
-        });
+        if (connections.length == 0) {
+          throw new Error(`The Workflow contains a "${moduleClass}" module with none Input assigned.`);
+        }
+        for (let i = 0; i < connections.length; i++) {
+          let inputNodeId = connections[i].node;
+          let inputOp = editor.getNodePipeline(inputNodeId, pipelineStream);
+          inputOp['outputStageId'] = nodeId;
+          inputOps.push(inputOp);
+        }
+        if (inputOps.length > 1) {
+          let joinOp = {
+            'stageId': editor.getUuid(),
+            'type': 'ConnectionJoin',
+            'outputStageId': nodeId,
+            'stages': inputOps.map(op => op.stageId)
+          };
+          inputOps.forEach((op) => { op['outputStageId'] = joinOp.stageId; pipelineStream.push(op); });
+          nodeOp['inputStageId'] = joinOp.stageId;
+          pipelineStream.push(joinOp);
+          // alert(JSON.stringify(joinOp, undefined, 2));
+        }
+        else {
+          inputOp = inputOps[0];
+          nodeOp['inputStageId'] = inputOp.stageId;
+          pipelineStream.push(inputOp);
+        }
       }
       // alert(JSON.stringify(nodeOp, undefined, 2));
       return nodeOp;
@@ -458,6 +475,35 @@
       onDataChanged('dataNodeChanged', nodeId);
     }
 
+    // Update connections of input-type parameters of Modules.
+    function updateConnectionNodesOfInputParams(nodeId) {
+      let inputCount = 0;
+      let nodeConfig = editor.getNodeConfig(nodeId);
+
+      if (nodeConfig.class == 'filter') {
+        let index = 0;
+        let nodeDiv = document.getElementById('node-' + nodeId);
+
+        let moduleClass = nodeConfig.data.moduleClass;
+        let module = modules[moduleClass];
+        let params = module.params || {};
+
+        Object.entries(params).forEach(([key, param]) => {
+          if (param.dataType == 'input') {
+            let inputDiv = nodeDiv.querySelector('.input_' + (inputCount + 2).toString());
+            inputDiv.classList.add('parameter-input');
+            inputDiv.setAttribute('style', '--data-x:' + index.toString());
+            inputCount++;
+          }
+          index++;
+        });
+        if (inputCount > 0) {
+          editor.updateConnectionNodes('node-' + nodeId);
+        }
+      }
+      return inputCount;
+    }
+
     // Input/Output nodes first, maybe is better for the user.
     HtmlContent.getCategoryNode(tocNode, 'Input');
     HtmlContent.getCategoryNode(tocNode, 'Output');
@@ -583,6 +629,14 @@
             while (triggers.length > 0) {
               triggers[0].parentNode.removeChild(triggers[0]);
             }
+          });
+
+          let workflowName = editor.module;
+          let workflow = editor.drawflow.drawflow[workflowName].data;
+
+          // Update connections of input-type parameters of Modules.
+          Object.entries(workflow).forEach(([nodeId, nodeConfig]) => {
+            updateConnectionNodesOfInputParams(nodeId);
           });
 
           document.getElementById('_undoButton').disabled = true;
@@ -1045,7 +1099,20 @@
               </div>
             </div>`;
 
-          nodeId = editor.addNode('filter', 1, 1, pos_x, pos_y, 'filter', data, html);
+          let params = module['params'] || {};
+          let numInputs = 1;
+
+          // Calculate number of input-type parameters.
+          Object.entries(params).forEach(([key, param]) => {
+            if (param.dataType == 'input') { numInputs++; }
+          });
+
+          nodeId = editor.addNode('filter', numInputs, 1, pos_x, pos_y, 'filter', data, html);
+
+          // Update connections of input-type parameters of Modules.
+          if (numInputs > 1) {
+            updateConnectionNodesOfInputParams(nodeId);
+          }
           break;
         }
         case 'writer': {

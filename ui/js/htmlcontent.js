@@ -200,8 +200,16 @@ class HtmlContent {
     if (params) {
       Object.entries(params).forEach(([key, param]) => {
         let description = param.description ? param.description.replaceAll('"', "'") : '';
-        let html = `
-          <div class="parameter-row">
+        let html = '<div class="parameter-row">';
+
+        if (param.dataType == 'input') {
+          html += `
+            <i class="parameter-icon fas fa-arrow-right"></i>
+            <div class="parameter-label parameter-noeditable" onmouseover="mouseOverNode(event)" toolTip="${description}"> ${key}
+            </div>`;
+        }
+        else {
+          html += `
             <i class="parameter-icon far fa-circle"></i>
             <div class="parameter-label" onclick="editParameterOfModule(event)" onmouseover="mouseOverNode(event)" toolTip="${description}" data-type="${moduleType}" data-module="${module.name}" data-param="${key}"> ${key}
               <div class="modal-node" style="display:none">
@@ -215,8 +223,9 @@ class HtmlContent {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>`;
+            </div>`;
+        }
+        html += '</div>'
 
         let parameterDiv = document.createElement('div');
         parameterDiv.innerHTML = html;

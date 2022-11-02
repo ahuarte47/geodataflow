@@ -175,6 +175,15 @@ header a {
   fill: #4ea9ff;
 }
 
+.drawflow .drawflow-node .inputs, .drawflow .drawflow-node .outputs {
+  width: 0px;
+}
+
+.drawflow .drawflow-node .drawflow_content_node {
+  width: 100%;
+  display: block;
+}
+
 .drawflow .drawflow-node .input, .drawflow .drawflow-node .output {
   position: absolute;
   top: 16px;
@@ -335,6 +344,14 @@ input:placeholder-shown, textarea:placeholder-shown {
 .parameter-label {
   cursor: pointer;
   padding-left: 20px;
+}
+
+.parameter-noeditable {
+  cursor: default;
+}
+
+.parameter-input {
+  top: calc(50px + 10px + 8px + (var(--data-x) * 34px)) !important;
 }
 
 .parameter-box {

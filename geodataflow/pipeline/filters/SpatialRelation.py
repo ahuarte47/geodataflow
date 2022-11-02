@@ -97,7 +97,7 @@ class SpatialRelation(AbstractFilter):
             SpatialRelationships.Crosses: 'crosses',
             SpatialRelationships.Within: 'within',
             SpatialRelationships.Contains: 'contains',
-            SpatialRelationships.Overlaps: 'ovelaps'
+            SpatialRelationships.Overlaps: 'overlaps'
         }
         rel_name = rel_names.get(relationship)
         if not rel_name:
