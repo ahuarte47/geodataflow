@@ -34,7 +34,7 @@
 from geodataflow.pipeline.basictypes import AbstractFilter
 
 
-class RasterMerge(AbstractFilter):
+class RasterMosaic(AbstractFilter):
     """
     The Filter merges all input Rasters to one unique Output.
     """
@@ -45,7 +45,7 @@ class RasterMerge(AbstractFilter):
         """
         Returns the Human alias-name of this Module.
         """
-        return 'Merge'
+        return 'Mosaic'
 
     def description(self) -> str:
         """
