@@ -88,13 +88,10 @@ class RasterClip(AbstractFilter):
         ]
 
         if clipping_geoms:
-            from shapely.wkt import loads as shapely_wkt_loads
-            from shapely.geometry import shape as shapely_shape
             from geodataflow.geoext.commonutils import GeometryUtils
 
-            schema_def = self.pipeline_args.schema_def
-
             if self.srid:
+                schema_def = self.pipeline_args.schema_def
                 source_crs = GeometryUtils.get_spatial_crs(self.srid)
                 target_crs = GeometryUtils.get_spatial_crs(schema_def.srid)
                 transform_fn = GeometryUtils.create_transform_function(source_crs, target_crs)
