@@ -32,7 +32,7 @@
 """
 
 __title__ = 'geodataflow'
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 __description__ = 'Toolkit to run workflows on Geospatial & Earth Observation (EO) data.'
 __author__ = 'Alvaro Huarte'
 __email__ = 'ahuarte47@gmail.com'
