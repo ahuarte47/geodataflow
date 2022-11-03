@@ -33,6 +33,7 @@
 
 from typing import Dict
 from geodataflow.pipeline.basictypes import AbstractFilter
+from geodataflow.pipeline.filters.InputParam import InputParam
 
 
 class RasterClip(AbstractFilter):
@@ -41,10 +42,8 @@ class RasterClip(AbstractFilter):
     """
     def __init__(self):
         AbstractFilter.__init__(self)
-        self.borderSizeX = 0
-        self.borderSizeY = 0
         self.srid = 0
-        self.geometry = None
+        self.geometry = ''
 
     def alias(self) -> str:
         """
@@ -69,26 +68,12 @@ class RasterClip(AbstractFilter):
         Returns the declaration of parameters supported by this Module.
         """
         return {
-            'borderSizeX': {
-                'description':
-                    'Size of border to remove in X-direction (Pixels). ' +
-                    'Mutually exclusive with "geometry" param.',
-                'dataType': 'int',
-                'default': 0
-            },
-            'borderSizeY': {
-                'description':
-                    'Size of border to remove in Y-direction (Pixels). ' +
-                    'Mutually exclusive with "geometry" param.',
-                'dataType': 'int',
-                'default': 0
-            },
             'geometry': {
-                'description': 'Clipping Geometry, Formats WKT or JSON are accepted.',
-                'dataType': 'geometry'
+                'description': 'Collection of Geometries that will clip input Features.',
+                'dataType': 'input'
             },
             'srid': {
-                'description': 'SRID of clipping Geometry (Optional).',
+                'description': 'SRID of clipping Geometries (Optional).',
                 'dataType': 'int',
                 'default': 0
             }
@@ -98,52 +83,34 @@ class RasterClip(AbstractFilter):
         """
         Transform input Geospatial data. It should return a new iterable set of Geospatial features.
         """
-        if self.borderSizeX and self.borderSizeY:
-            from geodataflow.geoext.commonutils import GeometryUtils
+        clipping_geoms = [
+            obj.geometry for obj in InputParam.enumerate_inputs(self.geometry, self.pipeline_args)
+        ]
 
-            # Clip input Dataset removing current defined border.
-            for dataset in data_store:
-                info = dataset.get_metadata()
-                envelope = info.get('envelope')
-                pixel_size_x = info.get('pixelSizeX')
-                pixel_size_y = info.get('pixelSizeY')
-
-                envelope = [
-                    envelope[0] + self.borderSizeX * pixel_size_x,
-                    envelope[1] + self.borderSizeY * pixel_size_y,
-                    envelope[2] - self.borderSizeX * pixel_size_x,
-                    envelope[3] - self.borderSizeY * pixel_size_y
-                ]
-                clipping_geom = GeometryUtils.create_geometry_from_bbox(*envelope)
-                setattr(clipping_geom, 'srid', info.get('srid'))
-
-                new_dataset = dataset.warp(output_crs=None, output_geom=clipping_geom)
-                dataset.recycle()
-                yield new_dataset
-
-        elif self.geometry:
+        if clipping_geoms:
             from shapely.wkt import loads as shapely_wkt_loads
             from shapely.geometry import shape as shapely_shape
             from geodataflow.geoext.commonutils import GeometryUtils
 
             schema_def = self.pipeline_args.schema_def
 
-            # Build clipping Geometry.
-            clipping_geom = shapely_wkt_loads(self.geometry) \
-                if isinstance(self.geometry, str) else shapely_shape(self.geometry)
-
             if self.srid:
                 source_crs = GeometryUtils.get_spatial_crs(self.srid)
                 target_crs = GeometryUtils.get_spatial_crs(schema_def.srid)
                 transform_fn = GeometryUtils.create_transform_function(source_crs, target_crs)
-                clipping_geom = transform_fn(clipping_geom)
+                clipping_geoms = [transform_fn(g) for g in clipping_geoms]
             else:
-                setattr(clipping_geom, 'srid', schema_def.srid)
+                for g in clipping_geoms:
+                    setattr(g, 'srid', schema_def.srid)
 
             for dataset in data_store:
-                new_dataset = dataset.warp(output_crs=None, output_geom=clipping_geom)
-                dataset.recycle()
-                yield new_dataset
+                for g in clipping_geoms:
+                    if g.intersects(dataset.geometry):
+                        new_dataset = dataset.warp(output_crs=None, output_geom=g)
+                        dataset.recycle()
+                        dataset = new_dataset
+
+                yield dataset
         else:
             for dataset in data_store:
                 yield dataset

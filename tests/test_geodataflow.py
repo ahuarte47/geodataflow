@@ -154,20 +154,6 @@ class TestGeodataFlow(unittest.TestCase):
         self.assertAlmostEqual(feature.geometry.area, 1.0896490, places=6)
         pass
 
-    def test_feature_reset_id(self):
-        """
-        Test FeatureResetID module.
-        """
-        pipeline_file = os.path.join(DATA_FOLDER, 'test_feature_reset_id.json')
-        features = list(self.process_pipeline(pipeline_file))
-
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Feature')
-        self.assertEqual(feature.geometry.geom_type, 'Polygon')
-        self.assertIsNone(feature.fid)
-        pass
-
     def test_feature_centroid(self):
         """
         Test GeometryCentroid module.
