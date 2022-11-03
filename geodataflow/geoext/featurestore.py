@@ -170,7 +170,7 @@ class OgrFeatureStore:
             for feature in feature_layer.features():
                 geometry = feature.GetGeometryRef()
                 geometry = shapely_wkb_loads(bytes(geometry.ExportToWkb()))
-                setattr(geometry, 'srid', schema_def.srid)
+                geometry = geometry.with_srid(schema_def.srid)
 
                 feature = type('Feature', (object,), {
                     'type': 'Feature',

@@ -69,7 +69,7 @@ class TableUnpack(AbstractFilter):
             #
             for index, row in data_frame.iterrows():
                 geometry = row['geometry']
-                setattr(geometry, 'srid', schema_def.srid)
+                geometry = geometry.with_srid(schema_def.srid)
 
                 feature = type('Feature', (object,), {
                     'type': 'Feature',

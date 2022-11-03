@@ -39,6 +39,7 @@ from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
 import pyproj as pj
 from shapely.geometry.polygon import Polygon
 from shapely.geometry.base import BaseGeometry
+from shapely.geos import lgeos
 from shapely.ops import transform
 
 from geodataflow.core.capabilities import StoreCapabilities
@@ -354,7 +355,7 @@ class GeometryUtils:
         def transform_fn_(geometry: BaseGeometry) -> BaseGeometry:
             if transform_fn:
                 geometry = transform(transform_fn, geometry)
-                setattr(geometry, 'srid', target_srid)
+                geometry = geometry.with_srid(target_srid)
 
             return geometry
 
@@ -365,12 +366,14 @@ class GeometryUtils:
         """
         Returns the SRID of this Geometry.
         """
-        if hasattr(obj, 'srid'):
-            return getattr(obj, 'srid')
         if isinstance(obj, int):
             return obj
+        if isinstance(obj, BaseGeometry):
+            return lgeos.GEOSGetSRID(obj._geom)
         if isinstance(obj, pj.CRS):
             return obj.to_epsg()
+        if hasattr(obj, 'srid'):
+            return getattr(obj, 'srid')
 
         return 0
 
@@ -381,7 +384,10 @@ class GeometryUtils:
         """
         srid = GeometryUtils.get_srid(obj)
         if srid:
-            setattr(geometry, 'srid', srid)
+            if isinstance(geometry, BaseGeometry):
+                lgeos.GEOSSetSRID(geometry._geom, srid)
+            else:
+                setattr(geometry, 'srid', srid)
 
         return geometry
 

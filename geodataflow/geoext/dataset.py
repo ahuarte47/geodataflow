@@ -109,7 +109,7 @@ class GdalDataset:
         """
         envelope = self.get_envelope()
         geometry = GeometryUtils.create_geometry_from_bbox(*envelope)
-        setattr(geometry, 'srid', self.get_spatial_srid())
+        geometry = geometry.with_srid(self.get_spatial_srid())
         return geometry
 
     @property
@@ -270,7 +270,7 @@ class GdalDataset:
             return envelope
 
         geometry = GeometryUtils.create_geometry_from_bbox(*envelope)
-        setattr(geometry, 'srid', info.get('srid'))
+        geometry = geometry.with_srid(info.get('srid'))
         return geometry
 
     def warp(self,
@@ -285,8 +285,7 @@ class GdalDataset:
 
         if isinstance(output_geom, list):
             output_geom = GeometryUtils.create_geometry_from_bbox(*output_geom)
-            setattr(output_geom,
-                    'srid', GeometryUtils.get_srid(output_crs) if output_crs else info.get('srid'))
+            output_geom = output_geom.with_srid(GeometryUtils.get_srid(output_crs) if output_crs else info.get('srid'))
 
         if output_geom:
             source_crs = GeometryUtils.get_spatial_crs(info.get('srid'))

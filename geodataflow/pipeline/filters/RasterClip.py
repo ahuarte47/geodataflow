@@ -98,7 +98,7 @@ class RasterClip(AbstractFilter):
                 clipping_geoms = [transform_fn(g) for g in clipping_geoms]
             else:
                 for g in clipping_geoms:
-                    setattr(g, 'srid', schema_def.srid)
+                    g = g.with_srid(schema_def.srid)
 
             for dataset in data_store:
                 for g in clipping_geoms:

@@ -130,5 +130,5 @@ class ProductCatalog:
         """
         Normalize properties of specified EOProduct from different EO Providers.
         """
-        setattr(product.geometry, 'srid', 4326)
+        product.geometry = product.geometry.with_srid(4326)
         return product
