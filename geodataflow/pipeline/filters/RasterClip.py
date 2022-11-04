@@ -33,7 +33,6 @@
 
 from typing import Dict
 from geodataflow.pipeline.basictypes import AbstractFilter
-from geodataflow.pipeline.filters.InputParam import InputParam
 
 
 class RasterClip(AbstractFilter):
@@ -78,7 +77,7 @@ class RasterClip(AbstractFilter):
         Transform input Geospatial data. It should return a new iterable set of Geospatial features.
         """
         clipping_geoms = [
-            obj.geometry for obj in InputParam.enumerate_inputs(self.clipGeometries, self.pipeline_args)
+            obj.geometry for obj in self.enumerate_inputs(self.clipGeometries)
         ]
 
         if clipping_geoms:

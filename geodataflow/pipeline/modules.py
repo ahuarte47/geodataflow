@@ -31,7 +31,7 @@
 ===============================================================================
 """
 
-from typing import Dict
+from typing import Dict, List, Union
 from uuid import uuid4
 from collections.abc import Iterable
 
@@ -131,3 +131,18 @@ class AbstractModule(Iterable):
         Finishing a Workflow on Geospatial data.
         """
         return False
+
+    def enumerate_inputs(self, stages: Union[str, List[str]]) -> Iterable:
+        """
+        Returns an iterable collection of Features of the specified Stage[s].
+        """
+        from geodataflow.pipeline.filters.InputParam import InputParam
+
+        pipeline_args = self.pipeline_args
+        if not pipeline_args:
+            raise Exception('Invoking "enumerate_inputs()" outside of a running Context')
+
+        for row in InputParam.enumerate_inputs(stages, pipeline_args):
+            yield row
+
+        pass

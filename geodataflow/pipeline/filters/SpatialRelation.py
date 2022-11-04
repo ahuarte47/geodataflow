@@ -35,7 +35,6 @@ from typing import Dict
 from geodataflow.core.processingargs import ProcessingUtils
 from geodataflow.geoext.relationships import SpatialRelationships
 from geodataflow.pipeline.basictypes import AbstractFilter
-from geodataflow.pipeline.filters.InputParam import InputParam
 
 
 class SpatialRelation(AbstractFilter):
@@ -85,7 +84,7 @@ class SpatialRelation(AbstractFilter):
         """
         relationship = ProcessingUtils.cast_enum(self.relationship, SpatialRelationships)
         others = [
-            obj.geometry for obj in InputParam.enumerate_inputs(self.otherGeometries, self.pipeline_args)
+            obj.geometry for obj in self.enumerate_inputs(self.otherGeometries)
         ]
 
         # Set names of implemented Spatial Relationsips between geometries.
