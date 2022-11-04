@@ -42,8 +42,7 @@ class RasterClip(AbstractFilter):
     """
     def __init__(self):
         AbstractFilter.__init__(self)
-        self.srid = 0
-        self.geometry = ''
+        self.clipGeometries = ''
 
     def alias(self) -> str:
         """
@@ -68,14 +67,9 @@ class RasterClip(AbstractFilter):
         Returns the declaration of parameters supported by this Module.
         """
         return {
-            'geometry': {
+            'clipGeometries': {
                 'description': 'Collection of Geometries that will clip input Features.',
                 'dataType': 'input'
-            },
-            'srid': {
-                'description': 'SRID of clipping Geometries (Optional).',
-                'dataType': 'int',
-                'default': 0
             }
         }
 
@@ -84,21 +78,21 @@ class RasterClip(AbstractFilter):
         Transform input Geospatial data. It should return a new iterable set of Geospatial features.
         """
         clipping_geoms = [
-            obj.geometry for obj in InputParam.enumerate_inputs(self.geometry, self.pipeline_args)
+            obj.geometry for obj in InputParam.enumerate_inputs(self.clipGeometries, self.pipeline_args)
         ]
 
         if clipping_geoms:
             from geodataflow.geoext.commonutils import GeometryUtils
 
-            if self.srid:
-                schema_def = self.pipeline_args.schema_def
-                source_crs = GeometryUtils.get_spatial_crs(self.srid)
-                target_crs = GeometryUtils.get_spatial_crs(schema_def.srid)
-                transform_fn = GeometryUtils.create_transform_function(source_crs, target_crs)
-                clipping_geoms = [transform_fn(g) for g in clipping_geoms]
-            else:
-                for g in clipping_geoms:
-                    g = g.with_srid(schema_def.srid)
+            schema_def = self.pipeline_args.schema_def
+            if schema_def.srid:
+                schema_crs = GeometryUtils.get_spatial_crs(schema_def.srid)
+
+                for g_index, g in enumerate(clipping_geoms):
+                    if g.get_srid():
+                        clipping_crs = GeometryUtils.get_spatial_crs(g.get_srid())
+                        transform_fn = GeometryUtils.create_transform_function(clipping_crs, schema_crs)
+                        clipping_geoms[g_index] = transform_fn(g)
 
             for dataset in data_store:
                 for g in clipping_geoms:
