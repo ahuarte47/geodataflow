@@ -1,0 +1,25 @@
+{
+  "pipeline": [
+    {
+      "type": "RasterReader",
+      "stageId": "input-A",
+      "connectionString": "${TEST_DATA_PATH}/S2L2A-tiff-sample.tif"
+    },
+    {
+      "type": "FeatureReader",
+      "stageId": "input-B",
+      "connectionString": "${TEST_DATA_PATH}/S2L2A-polygon.geojson"
+    },
+    {
+      "type": "RasterClip",
+      "inputStageId": "input-A",
+      "cutline": true,
+      "clipGeometries": "input-B"
+    },
+    {
+      "type": "RasterWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.tif",
+      "formatOptions": [ "-of", "Gtiff", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "PREDICTOR=2" ]
+    }
+  ]
+}

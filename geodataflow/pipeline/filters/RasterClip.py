@@ -42,6 +42,7 @@ class RasterClip(AbstractFilter):
     def __init__(self):
         AbstractFilter.__init__(self)
         self.clipGeometries = ''
+        self.cutline = True
 
     def alias(self) -> str:
         """
@@ -69,6 +70,11 @@ class RasterClip(AbstractFilter):
             'clipGeometries': {
                 'description': 'Collection of Geometries that will clip input Features.',
                 'dataType': 'input'
+            },
+            'cutline': {
+                'description': 'Clipping using lines of Geometries, otherwise just envelopes are used. True by default.',
+                'dataType': 'bool',
+                'default': True
             }
         }
 
@@ -76,6 +82,8 @@ class RasterClip(AbstractFilter):
         """
         Transform input Geospatial data. It should return a new iterable set of Geospatial features.
         """
+        from geodataflow.geoext.dataset import GdalDataset
+
         clipping_geoms = [
             obj.geometry for obj in self.enumerate_inputs(self.clipGeometries)
         ]
@@ -94,9 +102,12 @@ class RasterClip(AbstractFilter):
                         clipping_geoms[g_index] = transform_fn(g)
 
             for dataset in data_store:
+                if not isinstance(dataset, GdalDataset):
+                    raise Exception('RasterClip only accepts Datasets as input data.')
+
                 for g in clipping_geoms:
                     if g.intersects(dataset.geometry):
-                        new_dataset = dataset.warp(output_crs=None, output_geom=g)
+                        new_dataset = dataset.warp(output_crs=None, output_geom=g, cutline=self.cutline)
                         dataset.recycle()
                         dataset = new_dataset
 

@@ -283,6 +283,23 @@ class TestGeodataFlow(unittest.TestCase):
         self.assertEqual(dataset.RasterYSize, 201)
         pass
 
+    def test_raster_clip(self):
+        """
+        Test Workflow applying a clipping operation to a raster.
+        """
+        pipeline_file = os.path.join(DATA_FOLDER, 'test_raster_clip.json')
+        features = list(self.process_pipeline(pipeline_file))
+
+        self.assertEqual(len(features), 1)
+        feature = features[0]
+        self.assertEqual(feature.type, 'Raster')
+        self.assertEqual(feature.geometry.geom_type, 'Polygon')
+        dataset = feature.dataset()
+        self.assertEqual(dataset.RasterCount, 4)
+        self.assertEqual(dataset.RasterXSize, 38)
+        self.assertEqual(dataset.RasterYSize, 31)
+        pass
+
     def test_raster_transform(self):
         """
         Test RasterTransform module.

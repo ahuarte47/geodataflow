@@ -43,6 +43,7 @@ from geodataflow.core.schemadef import DataType, FieldDef
 from osgeo import gdalconst as gdal_const
 from osgeo import gdal_array
 from osgeo import osr
+from shapely.wkb import dumps as shapely_wkb_dumps
 osr.UseExceptions()
 
 # Default schema of a GDAL Dataset.
@@ -273,9 +274,48 @@ class GdalDataset:
         geometry = geometry.with_srid(info.get('srid'))
         return geometry
 
+    def _geometry_to_layer(self, geometry) -> str:
+        """
+        Create a FeatureLayer from the specified Geometry.
+        """
+        gdal_env = self.env()
+        ogr = gdal_env.ogr()
+
+        attribute_name = 'my_id'
+        layer_name = str(uuid.uuid4()).replace('-', '')
+        layer_file = os.path.join(gdal_env.temp_data_path(), '{}.shp'.format(layer_name))
+
+        spatial_ref = osr.SpatialReference()
+        spatial_ref.ImportFromEPSG(geometry.get_srid())
+        if hasattr(spatial_ref, 'SetAxisMappingStrategy'): spatial_ref.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+        driver = ogr.GetDriverByName('ESRI Shapefile')
+        feature_store = driver.CreateDataSource(layer_file, options=[])
+        feature_layer = feature_store.CreateLayer(layer_name, srs=spatial_ref, geom_type=ogr.wkbMultiPolygon)
+        feature_field = ogr.FieldDefn(attribute_name, ogr.OFTInteger)
+        feature_layer.CreateField(feature_field)
+        layer_schema = feature_layer.GetLayerDefn()
+
+        geometry_wkb = shapely_wkb_dumps(geometry)
+        geometry_ogr = ogr.CreateGeometryFromWkb(geometry_wkb)
+
+        # Saving the geometries of interest to a temporary Feature Layer to rasterize.
+        feature = ogr.Feature(layer_schema)
+        feature.SetField(attribute_name, 1)
+        feature.SetGeometry(geometry_ogr)
+        feature_layer.CreateFeature(feature)
+        feature = None
+
+        layer_schema = None
+        feature_field = None
+        feature_layer = None
+        feature_store = None
+        return layer_file
+
     def warp(self,
              output_crs=None, output_res_x: float = None, output_res_y: float = None, output_geom=None,
-             resample_arg: int = gdal_const.GRA_Bilinear) -> "GdalDataset":
+             resample_arg: int = gdal_const.GRA_Bilinear,
+             cutline: bool = False) -> "GdalDataset":
         """
         Warp this Dataset by specified parameters.
         """
@@ -311,12 +351,17 @@ class GdalDataset:
 
             if output_res_x and output_res_y:
                 envelope = GeometryUtils.clamp_envelope(list(geometry.bounds), output_res_x, output_res_y)
+                geometry = GeometryUtils.create_geometry_from_bbox(*envelope)
             else:
                 envelope = list(geometry.bounds)
+
+            layer_file = \
+                self._geometry_to_layer(geometry) if cutline else None
 
             # Define the Warping options for resampling and reprojection.
             options = gdal.WarpOptions(format='Gtiff',
                                        outputBounds=envelope,
+                                       cutlineDSName=layer_file,
                                        resampleAlg=resample_arg,
                                        xRes=output_res_x,
                                        yRes=output_res_y,
