@@ -77,6 +77,7 @@ class GdalDataset:
         self._init_object(dataset_or_path)
 
     def __del__(self):
+        self.recycle()
         self._gdal_env = None
         self._dataset_path = None
         self._recyclable = False

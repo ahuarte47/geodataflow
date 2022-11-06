@@ -80,10 +80,11 @@ class TestGeodataFlow(unittest.TestCase):
             # Load workflow & Get Schema.
             pipeline = PipelineManager(config=app_settings, custom_modules_path=custom_modules_path)
             pipeline.load_from_file(pipeline_file, pipeline_args)
-            rs = pipeline.get_schema(processing_args, stageId)
-            return rs
+            schema_def = pipeline.get_schema(processing_args, stageId)
 
-    def process_pipeline(self, pipeline_file: str, pipeline_args: Dict[str, str] = {}) -> Iterable:
+            return schema_def
+
+    def process_pipeline(self, test_func: callable, pipeline_file: str, pipeline_args: Dict[str, str] = {}) -> Iterable:
         """
         Process the specified Pipeline file and returns the collection of Features.
         """
@@ -110,10 +111,10 @@ class TestGeodataFlow(unittest.TestCase):
             pipeline = PipelineManager(config=app_settings, custom_modules_path=custom_modules_path)
             pipeline.load_from_file(pipeline_file, pipeline_args)
             pipeline.run(processing_args, output_callback, {})
-            pass
 
-        for feature in features:
-            yield feature
+            # Validate results.
+            test_func(features)
+            features.clear()
 
         pass
 
@@ -130,13 +131,16 @@ class TestGeodataFlow(unittest.TestCase):
         Test Workflow reading features from an embebbed GeoJson FeatureCollection.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_input_from_feature_collection.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Feature')
-        self.assertEqual(feature.geometry.geom_type, 'Polygon')
-        self.assertAlmostEqual(feature.geometry.area, 0.0164884, places=6)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Feature')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            self.assertAlmostEqual(feature.geometry.area, 0.0164884, places=6)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_input_from_file_data(self):
@@ -144,14 +148,17 @@ class TestGeodataFlow(unittest.TestCase):
         Test Workflow reading features from an embebbed FileData (Base64).
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_input_from_file_data.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Feature')
-        self.assertEqual(feature.geometry.geom_type, 'MultiPolygon')
-        self.assertEqual(len(feature.geometry.geoms), 1)
-        self.assertAlmostEqual(feature.geometry.area, 1.0896490, places=6)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Feature')
+            self.assertEqual(feature.geometry.geom_type, 'MultiPolygon')
+            self.assertEqual(len(feature.geometry.geoms), 1)
+            self.assertAlmostEqual(feature.geometry.area, 1.0896490, places=6)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_feature_centroid(self):
@@ -159,14 +166,17 @@ class TestGeodataFlow(unittest.TestCase):
         Test GeometryCentroid module.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_feature_centroid.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Feature')
-        self.assertEqual(feature.geometry.geom_type, 'Point')
-        self.assertAlmostEqual(feature.geometry.x, -1.6527555, places=6)
-        self.assertAlmostEqual(feature.geometry.y, 42.8170465, places=6)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Feature')
+            self.assertEqual(feature.geometry.geom_type, 'Point')
+            self.assertAlmostEqual(feature.geometry.x, -1.6527555, places=6)
+            self.assertAlmostEqual(feature.geometry.y, 42.8170465, places=6)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_feature_buffer(self):
@@ -174,13 +184,16 @@ class TestGeodataFlow(unittest.TestCase):
         Test GeometryCentroid module.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_feature_buffer.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Feature')
-        self.assertEqual(feature.geometry.geom_type, 'Polygon')
-        self.assertAlmostEqual(feature.geometry.area, 0.0223177, places=6)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Feature')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            self.assertAlmostEqual(feature.geometry.area, 0.0223177, places=6)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_geopandas(self):
@@ -191,14 +204,17 @@ class TestGeodataFlow(unittest.TestCase):
             import geopandas  # noqa: F401
 
             pipeline_file = os.path.join(DATA_FOLDER, 'test_geopandas.json')
-            features = list(self.process_pipeline(pipeline_file))
 
-            self.assertEqual(len(features), 1)
-            feature = features[0]
-            self.assertEqual(feature.type, 'Feature')
-            self.assertEqual(feature.geometry.geom_type, 'Polygon')
-            self.assertEqual(GeometryUtils.get_srid(feature.geometry), 4326)
-            self.assertEqual(feature.properties['tileId'], '30TXM')
+            def test_func(features):
+                """ Test results """
+                self.assertEqual(len(features), 1)
+                feature = features[0]
+                self.assertEqual(feature.type, 'Feature')
+                self.assertEqual(feature.geometry.geom_type, 'Polygon')
+                self.assertEqual(GeometryUtils.get_srid(feature.geometry), 4326)
+                self.assertEqual(feature.properties['tileId'], '30TXM')
+
+            self.process_pipeline(test_func, pipeline_file)
         except ModuleNotFoundError as e:
             self.logger.warning('Ignoring "test_geopandas" test. {}'.format(str(e)))
 
@@ -209,14 +225,17 @@ class TestGeodataFlow(unittest.TestCase):
         Test GeometryTransform module.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_feature_transform.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Feature')
-        self.assertEqual(feature.geometry.geom_type, 'Polygon')
-        self.assertEqual(GeometryUtils.get_srid(feature.geometry), 25830)
-        self.assertAlmostEqual(feature.geometry.area, 149725216.7391, places=3)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Feature')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            self.assertEqual(GeometryUtils.get_srid(feature.geometry), 25830)
+            self.assertAlmostEqual(feature.geometry.area, 149725216.7391, places=3)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_eo_stac_catalog(self):
@@ -224,15 +243,18 @@ class TestGeodataFlow(unittest.TestCase):
         Test EOProductCatalog module (STAC provider).
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_eo_stac_catalog.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 2)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Feature')
-        self.assertEqual(feature.geometry.geom_type, 'Polygon')
-        self.assertEqual(GeometryUtils.get_srid(feature.geometry), 4326)
-        self.assertTrue(any('WN' in feature.properties['sentinel:grid_square'] for feature in features))
-        self.assertTrue(any('XN' in feature.properties['sentinel:grid_square'] for feature in features))
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 2)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Feature')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            self.assertEqual(GeometryUtils.get_srid(feature.geometry), 4326)
+            self.assertTrue(any('WN' in feature.properties['sentinel:grid_square'] for feature in features))
+            self.assertTrue(any('XN' in feature.properties['sentinel:grid_square'] for feature in features))
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_eo_stac_dataset(self):
@@ -240,17 +262,20 @@ class TestGeodataFlow(unittest.TestCase):
         Test EOProductDataset module (STAC provider).
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_eo_stac_dataset.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Raster')
-        self.assertEqual(feature.geometry.geom_type, 'Polygon')
-        self.assertEqual(GeometryUtils.get_srid(feature.geometry), 4326)
-        metadata = feature.get_metadata()
-        self.assertEqual(metadata['rasterCount'], 2)
-        self.assertAlmostEqual(metadata['pixelSizeX'], 0.000106, places=5)
-        self.assertAlmostEqual(metadata['pixelSizeY'], 0.000106, places=5)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Raster')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            self.assertEqual(GeometryUtils.get_srid(feature.geometry), 4326)
+            metadata = feature.get_metadata()
+            self.assertEqual(metadata['rasterCount'], 2)
+            self.assertAlmostEqual(metadata['pixelSizeX'], 0.000106, places=5)
+            self.assertAlmostEqual(metadata['pixelSizeY'], 0.000106, places=5)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_raster_to_vector(self):
@@ -258,12 +283,15 @@ class TestGeodataFlow(unittest.TestCase):
         Test Workflow converting raster to vector.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_raster_to_vector.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Raster')
-        self.assertEqual(feature.geometry.geom_type, 'Polygon')
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Raster')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_raster_calc(self):
@@ -271,16 +299,19 @@ class TestGeodataFlow(unittest.TestCase):
         Test Workflow applying a band expression to a raster.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_raster_calc.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Raster')
-        self.assertEqual(feature.geometry.geom_type, 'Polygon')
-        dataset = feature.dataset()
-        self.assertEqual(dataset.RasterCount, 1)
-        self.assertEqual(dataset.RasterXSize, 201)
-        self.assertEqual(dataset.RasterYSize, 201)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Raster')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            dataset = feature.dataset()
+            self.assertEqual(dataset.RasterCount, 1)
+            self.assertEqual(dataset.RasterXSize, 201)
+            self.assertEqual(dataset.RasterYSize, 201)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_raster_clip(self):
@@ -288,16 +319,19 @@ class TestGeodataFlow(unittest.TestCase):
         Test Workflow applying a clipping operation to a raster.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_raster_clip.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Raster')
-        self.assertEqual(feature.geometry.geom_type, 'Polygon')
-        dataset = feature.dataset()
-        self.assertEqual(dataset.RasterCount, 4)
-        self.assertEqual(dataset.RasterXSize, 38)
-        self.assertEqual(dataset.RasterYSize, 31)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Raster')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            dataset = feature.dataset()
+            self.assertEqual(dataset.RasterCount, 4)
+            self.assertEqual(dataset.RasterXSize, 38)
+            self.assertEqual(dataset.RasterYSize, 31)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_raster_transform(self):
@@ -305,15 +339,18 @@ class TestGeodataFlow(unittest.TestCase):
         Test RasterTransform module.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_raster_transform.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
-        feature = features[0]
-        self.assertEqual(feature.type, 'Raster')
-        self.assertEqual(feature.geometry.geom_type, 'Polygon')
-        self.assertEqual(GeometryUtils.get_srid(feature.geometry), 25830)
-        metadata = feature.get_metadata()
-        self.assertEqual(metadata['srid'], 25830)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Raster')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            self.assertEqual(GeometryUtils.get_srid(feature.geometry), 25830)
+            metadata = feature.get_metadata()
+            self.assertEqual(metadata['srid'], 25830)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_schema_of_stage(self):
@@ -335,9 +372,12 @@ class TestGeodataFlow(unittest.TestCase):
         Test reading the Schema of a Stage.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_spatial_intersects.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 2)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 2)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_spatial_contains(self):
@@ -345,9 +385,12 @@ class TestGeodataFlow(unittest.TestCase):
         Test reading the Schema of a Stage.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_spatial_contains.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 1)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_spatial_disjoint(self):
@@ -355,9 +398,12 @@ class TestGeodataFlow(unittest.TestCase):
         Test reading the Schema of a Stage.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_spatial_disjoint.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 2)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 2)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
     def test_spatial_within(self):
@@ -365,9 +411,12 @@ class TestGeodataFlow(unittest.TestCase):
         Test reading the Schema of a Stage.
         """
         pipeline_file = os.path.join(DATA_FOLDER, 'test_spatial_within.json')
-        features = list(self.process_pipeline(pipeline_file))
 
-        self.assertEqual(len(features), 0)
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 0)
+
+        self.process_pipeline(test_func, pipeline_file)
         pass
 
 

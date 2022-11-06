@@ -32,11 +32,13 @@
 """
 
 import sys
+import threading
 from typing import Dict
 from geodataflow.core.processingargs import ProcessingArgs
 
 # Default GDAL/OGR environment.
-_DEFAULT_GDAL_ENV: "GdalEnv" = None
+_DEFAULT_GDAL_LOCK = threading.RLock()
+_DEFAULT_GDAL_ENVS: Dict[int, "GdalEnv"] = dict()
 
 
 class GdalEnv(ProcessingArgs):
@@ -57,29 +59,40 @@ class GdalEnv(ProcessingArgs):
         self._gdal = None
         self._ogr = None
 
-    @staticmethod
-    def make_as_default(default_env: "GdalEnv") -> "GdalEnv":
+    def dispose(self) -> None:
         """
-        Make the specified GDAL/OGR environment as default.
+        Dispose all resources including temporary data folder.
+        """
+        global _DEFAULT_GDAL_LOCK
+        global _DEFAULT_GDAL_ENVS
 
-        Args:
-            default_env: The default GdalEnv instance.
-        """
-        global _DEFAULT_GDAL_ENV
-        _DEFAULT_GDAL_ENV = default_env
-        return _DEFAULT_GDAL_ENV
+        with _DEFAULT_GDAL_LOCK:
+            thread_id = threading.get_ident()
+            gdal_env = _DEFAULT_GDAL_ENVS.get(thread_id)
+
+            if gdal_env is not None:
+                del _DEFAULT_GDAL_ENVS[thread_id]
+                gdal_env.dispose()
+
+        ProcessingArgs.dispose(self)
 
     @staticmethod
     def default() -> "GdalEnv":
         """
         Default GDAL/OGR environment.
         """
-        global _DEFAULT_GDAL_ENV
+        global _DEFAULT_GDAL_LOCK
+        global _DEFAULT_GDAL_ENVS
 
-        if _DEFAULT_GDAL_ENV is None:
-            _DEFAULT_GDAL_ENV = GdalEnv(config_options=GdalEnv.default_options(), temp_path='')
+        with _DEFAULT_GDAL_LOCK:
+            thread_id = threading.get_ident()
+            gdal_env = _DEFAULT_GDAL_ENVS.get(thread_id)
 
-        return _DEFAULT_GDAL_ENV
+            if gdal_env is None:
+                gdal_env = GdalEnv(config_options=GdalEnv.default_options(), temp_path='')
+                _DEFAULT_GDAL_ENVS[thread_id] = gdal_env
+
+            return gdal_env
 
     @staticmethod
     def default_options() -> Dict[str, str]:
