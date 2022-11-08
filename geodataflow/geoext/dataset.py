@@ -43,7 +43,7 @@ from geodataflow.core.schemadef import DataType, FieldDef
 from osgeo import gdalconst as gdal_const
 from osgeo import gdal_array
 from osgeo import osr
-from shapely.wkb import dumps as shapely_wkb_dumps
+from shapely.wkb import loads as shapely_wkb_loads, dumps as shapely_wkb_dumps
 osr.UseExceptions()
 
 # Default schema of a GDAL Dataset.
@@ -77,7 +77,6 @@ class GdalDataset:
         self._init_object(dataset_or_path)
 
     def __del__(self):
-        self.recycle()
         self._gdal_env = None
         self._dataset_path = None
         self._recyclable = False
@@ -352,7 +351,7 @@ class GdalDataset:
 
             if output_res_x and output_res_y:
                 envelope = GeometryUtils.clamp_envelope(list(geometry.bounds), output_res_x, output_res_y)
-                geometry = GeometryUtils.create_geometry_from_bbox(*envelope)
+                geometry = GeometryUtils.create_geometry_from_bbox(*envelope).with_srid(geometry.get_srid())
             else:
                 envelope = list(geometry.bounds)
 
@@ -513,6 +512,58 @@ class GdalDataset:
 
         pass
 
+    def polygonize(self, band_index: int = 0) -> Any:
+        """
+        Returns the Polygon of all connected regions of nodata pixels in the raster.
+        """
+        raster_count = self._dataset.RasterCount
+
+        if band_index >= raster_count:
+            raise Exception('Current Dataset has only {} Bands. You are defined the {} th one.'.format(raster_count, band_index))
+
+        gdal_env = self.env()
+        gdal = gdal_env.gdal()
+        ogr = gdal_env.ogr()
+
+        layer_name = str(uuid.uuid4()).replace('-', '')
+        layer_file = '/vsimem/{}'.format(layer_name)
+        srid = self.get_spatial_srid()
+
+        spatial_ref = osr.SpatialReference()
+        spatial_ref.ImportFromEPSG(srid)
+        if hasattr(spatial_ref, 'SetAxisMappingStrategy'): spatial_ref.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+
+        driver = ogr.GetDriverByName('Memory')
+        feature_store = driver.CreateDataSource(layer_file, options=[])
+        feature_layer = feature_store.CreateLayer(layer_name, srs=spatial_ref, geom_type=ogr.wkbMultiPolygon)
+        feature_field = ogr.FieldDefn('value', ogr.OFTInteger)
+        feature_layer.CreateField(feature_field)
+
+        # Polygonize specified Band.
+        rs_band = self._dataset.GetRasterBand(band_index + 1)
+        ms_band = rs_band.GetMaskBand()
+        gdal.Polygonize(rs_band, ms_band, feature_layer, 0, [], callback=None)
+        ms_band = None
+        rs_band = None
+
+        # Get Union of valid Geometries (value != nan).
+        geometry = None
+        for feature in feature_layer:
+            value = feature.GetField(0)
+
+            if value != -2147483648:
+                geometry_i = feature.GetGeometryRef()
+                geometry_i = shapely_wkb_loads(bytes(geometry_i.ExportToWkb()))
+                geometry = geometry_i if geometry is None else geometry.union(geometry_i)
+
+            pass
+
+        feature_field = None
+        feature_layer = None
+        feature_store.Destroy()
+        feature_store = None
+        return geometry.with_srid(srid) if geometry else None
+
     @staticmethod
     def mosaic_of_datasets(datasets: List["GdalDataset"],
                            resample_arg: int = gdal_const.GRA_Bilinear) -> "GdalDataset":
@@ -539,6 +590,7 @@ class GdalDataset:
 
             if info.get('srid') == first_info.get('srid'):
                 mosaic_of_files.append(dataset.dataset_path(force_exists=True))
+                dataset._recyclable = False
             else:
                 transform_fn = GeometryUtils.create_transform_function(
                     info.get('srid'), first_info.get('srid')

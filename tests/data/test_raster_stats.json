@@ -1,0 +1,17 @@
+{
+  "pipeline": [
+    {
+      "type": "RasterReader",
+      "connectionString": "${TEST_DATA_PATH}/NDVI-tiff-sample-01.tif"
+    },
+    {
+      "type": "RasterStats",
+      "stats": ["min", "max", "mean", "count", "sum", "std", "median", "majority", "minority", "unique", "range", "nodataCount", "percentile_10", "size"],
+      "polygonize": true
+    },
+    {
+      "type": "FeatureWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.geojson"
+    }
+  ]
+}

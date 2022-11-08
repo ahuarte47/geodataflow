@@ -353,6 +353,26 @@ class TestGeodataFlow(unittest.TestCase):
         self.process_pipeline(test_func, pipeline_file)
         pass
 
+    def test_raster_stats(self):
+        """
+        Test RasterStats module.
+        """
+        pipeline_file = os.path.join(DATA_FOLDER, 'test_raster_stats.json')
+
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Feature')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            self.assertAlmostEquals(feature.properties['min'], 0.17168459296226501, places=8)
+            self.assertAlmostEquals(feature.properties['max'], 0.38235294818878174, places=8)
+            self.assertAlmostEquals(feature.properties['mean'], 0.2934800447537696, places=8)
+            self.assertEqual(feature.properties['size'], 1178)
+
+        self.process_pipeline(test_func, pipeline_file)
+        pass
+
     def test_schema_of_stage(self):
         """
         Test reading the Schema of a Stage.

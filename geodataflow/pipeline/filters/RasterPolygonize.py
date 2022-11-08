@@ -31,31 +31,30 @@
 ===============================================================================
 """
 
+import logging
 from typing import Dict
 from geodataflow.pipeline.basictypes import AbstractFilter
 
 
-class RasterSplit(AbstractFilter):
+class RasterPolygonize(AbstractFilter):
     """
-    The Filter splits input Rasters to tiles.
+    The Filter returns the Geometry containing all connected regions of nodata pixels in input Datasets.
     """
     def __init__(self):
         AbstractFilter.__init__(self)
-        self.tileSizeX = 512
-        self.tileSizeY = 512
-        self.paddingVal = 0
-
-    def alias(self) -> str:
-        """
-        Returns the Human alias-name of this Module.
-        """
-        return 'Split'
+        self.bandIndex = 0
 
     def description(self) -> str:
         """
         Returns the Description text of this Module.
         """
-        return 'Splits input Rasters to tiles.'
+        return 'Returns the Geometry containing all connected regions of nodata pixels in input Datasets.'
+
+    def alias(self) -> str:
+        """
+        Returns the Human alias-name of this Module.
+        """
+        return 'Polygonize'
 
     def category(self) -> str:
         """
@@ -68,22 +67,23 @@ class RasterSplit(AbstractFilter):
         Returns the declaration of parameters supported by this Module.
         """
         return {
-            'tileSizeX': {
-                'description': 'Size of output tiles in X-direction (Pixels).',
-                'dataType': 'int',
-                'default': 512
-            },
-            'tileSizeY': {
-                'description': 'Size of output tiles in Y-direction (Pixels).',
-                'dataType': 'int',
-                'default': 512
-            },
-            'paddingVal': {
-                'description': 'Extra padding to apply to output',
+            "bandIndex": {
+                'description': 'Index of Band from which to create Geometries.',
                 'dataType': 'int',
                 'default': 0
             }
         }
+
+    def starting_run(self, schema_def, pipeline, processing_args):
+        """
+        Starting a new Workflow on Geospatial data.
+        """
+        from geodataflow.core.schemadef import GeometryType
+
+        schema_def = schema_def.clone()
+        schema_def.type = 'FeatureLayer'
+        schema_def.geometryType = GeometryType.Polygon
+        return schema_def
 
     def run(self, data_store, processing_args):
         """
@@ -91,13 +91,27 @@ class RasterSplit(AbstractFilter):
         """
         from geodataflow.geoext.dataset import GdalDataset
 
+        band_index = self.bandIndex
+        feature_index = 0
+
         for dataset in data_store:
             if not isinstance(dataset, GdalDataset):
-                raise Exception('RasterSplit only accepts Datasets as input data.')
+                raise Exception('RasterPolygonize only accepts Datasets as input data.')
 
-            for d in dataset.split(self.tileSizeX, self.tileSizeY, self.paddingVal):
-                yield d
+            properties = dataset.properties.copy()
+            geometry = dataset.polygonize(band_index=band_index)
 
-            dataset.recycle()
+            if geometry is None:
+                logging.warning('Polygonize returns an empty Geometry, input Dataset is skipped.')
+                continue
+
+            feature = type('Feature', (object,), {
+                'type': 'Feature',
+                'fid': feature_index,
+                'properties': properties,
+                'geometry': geometry,
+            })
+            feature_index += 1
+            yield feature
 
         pass
