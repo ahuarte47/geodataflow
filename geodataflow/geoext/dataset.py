@@ -287,7 +287,8 @@ class GdalDataset:
 
         spatial_ref = osr.SpatialReference()
         spatial_ref.ImportFromEPSG(geometry.get_srid())
-        if hasattr(spatial_ref, 'SetAxisMappingStrategy'): spatial_ref.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        if hasattr(spatial_ref, 'SetAxisMappingStrategy'):
+            spatial_ref.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
         driver = ogr.GetDriverByName('ESRI Shapefile')
         feature_store = driver.CreateDataSource(layer_file, options=[])
@@ -519,7 +520,8 @@ class GdalDataset:
         raster_count = self._dataset.RasterCount
 
         if band_index >= raster_count:
-            raise Exception('Current Dataset has only {} Bands. You are defined the {} th one.'.format(raster_count, band_index))
+            raise Exception('Current Dataset has only {} Bands. You are defined the {} th one.'
+                            .format(raster_count, band_index))
 
         gdal_env = self.env()
         gdal = gdal_env.gdal()
@@ -531,7 +533,8 @@ class GdalDataset:
 
         spatial_ref = osr.SpatialReference()
         spatial_ref.ImportFromEPSG(srid)
-        if hasattr(spatial_ref, 'SetAxisMappingStrategy'): spatial_ref.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
+        if hasattr(spatial_ref, 'SetAxisMappingStrategy'):
+            spatial_ref.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
 
         driver = ogr.GetDriverByName('Memory')
         feature_store = driver.CreateDataSource(layer_file, options=[])

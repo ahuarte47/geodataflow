@@ -57,6 +57,7 @@ ZONAL_STATS = [
     'size'
 ]
 
+
 def key_assoc_val(d, func, exclude=None):
     """
     Return the key associated with the value returned by func.
@@ -65,6 +66,7 @@ def key_assoc_val(d, func, exclude=None):
     ks = list(d.keys())
     key = ks[vs.index(func(vs))]
     return key
+
 
 def get_percentile(stat):
     if not stat.startswith('percentile_'):
@@ -118,7 +120,8 @@ class RasterStats(AbstractFilter):
         return {
             'stats': {
                 'description':
-                    'Method, or list of methods separated by commas, of summarizing and aggregating the raster values of input Datasets.',
+                    'Method, or list of methods separated by commas, ' +
+                    'of summarizing and aggregating the raster values of input Datasets--.',
                 'dataType': 'string',
                 'default': 'median',
                 'options': zonal_stats,
@@ -201,7 +204,7 @@ class RasterStats(AbstractFilter):
         pass
 
     @staticmethod
-    def zonal_statistics(raster, no_data: float, stats: List[str]):
+    def zonal_statistics(raster, no_data: float, stats: List[str]):  # noqa: C901
         """
         Zonal statistics of raster values aggregated to vector geometries.
         """
@@ -227,10 +230,12 @@ class RasterStats(AbstractFilter):
         else:
             if run_count:
                 keys, counts = np.unique(masked.compressed(), return_counts=True)
-            try:
-                pixel_count = dict(zip([k.item() for k in keys], [c.item() for c in counts]))
-            except AttributeError:
-                pixel_count = dict(zip([np.asscalar(k) for k in keys], [np.asscalar(c) for c in counts]))
+                try:
+                    pixel_count = dict(zip([k.item() for k in keys], [c.item() for c in counts]))
+                except AttributeError:
+                    pixel_count = dict(zip([np.asscalar(k) for k in keys], [np.asscalar(c) for c in counts]))
+            else:
+                pixel_count = {}
 
             if 'min' in stats:
                 feature_stats['min'] = float(masked.min())
