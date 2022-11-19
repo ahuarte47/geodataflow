@@ -43,6 +43,7 @@ class RasterClip(AbstractFilter):
         AbstractFilter.__init__(self)
         self.clipGeometries = ''
         self.cutline = True
+        self.allTouched = True
 
     def alias(self) -> str:
         """
@@ -73,6 +74,13 @@ class RasterClip(AbstractFilter):
             },
             'cutline': {
                 'description': 'Clipping using lines of Geometries, otherwise just envelopes are used. True by default.',
+                'dataType': 'bool',
+                'default': True
+            },
+            'allTouched': {
+                'description':
+                    'Ensures that that all pixels overlapping the cutline polygon will be selected, ' +
+                    'not just those whose center point falls within the polygon. True by default.',
                 'dataType': 'bool',
                 'default': True
             }
@@ -107,7 +115,7 @@ class RasterClip(AbstractFilter):
 
                 for g in clipping_geoms:
                     if g.intersects(dataset.geometry):
-                        new_dataset = dataset.warp(output_crs=None, output_geom=g, cutline=self.cutline)
+                        new_dataset = dataset.warp(output_crs=None, output_geom=g, cutline=self.cutline, all_touched=self.allTouched)
                         dataset.recycle()
                         dataset = new_dataset
 

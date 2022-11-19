@@ -316,7 +316,8 @@ class GdalDataset:
     def warp(self,
              output_crs=None, output_res_x: float = None, output_res_y: float = None, output_geom=None,
              resample_arg: int = gdal_const.GRA_Bilinear,
-             cutline: bool = False) -> "GdalDataset":
+             cutline: bool = False,
+             all_touched: bool = True) -> "GdalDataset":
         """
         Warp this Dataset by specified parameters.
         """
@@ -359,6 +360,11 @@ class GdalDataset:
             layer_file = \
                 self._geometry_to_layer(geometry) if cutline else None
 
+            warp_options = []
+
+            if cutline and all_touched:
+                warp_options.append("CUTLINE_ALL_TOUCHED")
+
             # Define the Warping options for resampling and reprojection.
             options = gdal.WarpOptions(format='Gtiff',
                                        outputBounds=envelope,
@@ -371,6 +377,7 @@ class GdalDataset:
                                        dstSRS='EPSG:' + str(output_crs.to_epsg()),
                                        dstNodata=info.get('noData'),
                                        copyMetadata=True,
+                                       warpOptions=warp_options,
                                        creationOptions=['TILED=YES', 'COMPRESS=DEFLATE', 'PREDICTOR=2'])
         else:
             source_srid = info.get('srid')
@@ -520,7 +527,7 @@ class GdalDataset:
         raster_count = self._dataset.RasterCount
 
         if band_index >= raster_count:
-            raise Exception('Current Dataset has only {} Bands. You are defined the {} th one.'
+            raise Exception('Current Dataset only has {} Bands. You are defined the {} th one.'
                             .format(raster_count, band_index))
 
         gdal_env = self.env()

@@ -14,6 +14,7 @@
       "type": "RasterClip",
       "inputStageId": "input-A",
       "cutline": true,
+      "allTouched": true,
       "clipGeometries": "input-B"
     },
     {
