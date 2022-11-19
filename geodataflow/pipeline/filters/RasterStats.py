@@ -184,7 +184,7 @@ class RasterStats(AbstractFilter):
                 logging.warning('Polygonize returns an empty Geometry, input Dataset is skipped.')
                 continue
 
-            # Calculate Zpnal statistics.
+            # Calculate Zonal statistics.
             rs_band = gdal_dataset.GetRasterBand(band_index + 1)
             raster = rs_band.ReadAsArray(xoff=0, yoff=0, win_xsize=raster_size_x, win_ysize=raster_size_y)
             nodata = rs_band.GetNoDataValue()
@@ -203,7 +203,7 @@ class RasterStats(AbstractFilter):
 
         pass
 
-    @staticmethod
+    @staticmethod  # noqa: C901
     def zonal_statistics(raster, no_data: float, stats: List[str]):  # noqa: C901
         """
         Zonal statistics of raster values aggregated to vector geometries.
