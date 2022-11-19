@@ -115,7 +115,9 @@ class RasterClip(AbstractFilter):
 
                 for g in clipping_geoms:
                     if g.intersects(dataset.geometry):
-                        new_dataset = dataset.warp(output_crs=None, output_geom=g, cutline=self.cutline, all_touched=self.allTouched)
+                        new_dataset = dataset.warp(
+                            output_crs=None, output_geom=g, cutline=self.cutline, all_touched=self.allTouched
+                        )
                         dataset.recycle()
                         dataset = new_dataset
 
