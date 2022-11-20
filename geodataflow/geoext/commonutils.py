@@ -66,6 +66,23 @@ class DataUtils:
         raise Exception('Unknown LayerName parsing of the ConnectionString="{}"'.format(connection_string))
 
     @staticmethod
+    def replace_layer_name(connection_string: str, layer_name: str) -> str:
+        """
+        Replaces the LayerName of the specified GDAL/OGR ConnectionString.
+        """
+        if DataUtils.represents_json_feature_collection(connection_string):
+            return layer_name
+
+        file_name, file_ext = os.path.splitext(connection_string)
+        if file_name and file_ext:
+            tmp_key = os.path.basename(file_name)
+            tmp_pos = tmp_key.find('.')
+            tmp_ext = tmp_key[tmp_pos:] if tmp_pos != -1 else ''
+            return os.path.join(os.path.dirname(connection_string), layer_name + tmp_ext + file_ext)
+
+        raise Exception('Unknown LayerName parsing of the ConnectionString="{}"'.format(connection_string))
+
+    @staticmethod
     def enumerate_single_connection_string(connection_string: Union[str, Iterable[str]]) -> Iterable[str]:
         """
         Enumerates the single connection string from the specified connection string.
@@ -176,6 +193,8 @@ class GdalUtils:
             return ogr.GetDriverByName('GeoJSON')
         if file_ext in ['.kml', '.kmz']:
             return ogr.GetDriverByName('KML')
+        if file_ext in ['.csv']:
+            return ogr.GetDriverByName('CSV')
 
         raise Exception('Unknown OGR Driver for the ConnectionString="{}"'.format(connection_string))
 
