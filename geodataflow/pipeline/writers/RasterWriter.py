@@ -140,7 +140,8 @@ class RasterWriter(AbstractWriter):
             if connection_index >= len(connection_strings):
                 connection_string = connection_strings[0]
                 layer_name = DataUtils.get_layer_name(connection_string)
-                connection_string = DataUtils.replace_layer_name(connection_string, '{}_{}'.format(layer_name, connection_index))
+                connection_string = \
+                    DataUtils.replace_layer_name(connection_string, '{}_{}'.format(layer_name, connection_index))
             else:
                 connection_string = connection_strings[connection_index]
 

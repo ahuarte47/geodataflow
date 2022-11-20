@@ -108,7 +108,10 @@ class OgrFeatureLayer(object):
         return spatial_ref
 
     @staticmethod
-    def create_layer(connection_string: str, layer_name: str, schema_def: SchemaDef, format_options: List[str] = []) -> "OgrFeatureLayer":
+    def create_layer(connection_string: str,
+                     layer_name: str,
+                     schema_def: SchemaDef,
+                     format_options: List[str] = []) -> "OgrFeatureLayer":
         """
         Creates a new OGR FeatureLayer from the specified SchemaDef.
         """
