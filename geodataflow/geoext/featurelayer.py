@@ -33,7 +33,7 @@
 
 import os
 import logging
-from typing import Iterable
+from typing import Iterable, List
 
 from geodataflow.core.schemadef import FieldDef, SchemaDef
 from geodataflow.geoext.commonutils import GdalUtils
@@ -108,7 +108,7 @@ class OgrFeatureLayer(object):
         return spatial_ref
 
     @staticmethod
-    def create_layer(connection_string: str, layer_name: str, schema_def: SchemaDef) -> "OgrFeatureLayer":
+    def create_layer(connection_string: str, layer_name: str, schema_def: SchemaDef, format_options: List[str] = []) -> "OgrFeatureLayer":
         """
         Creates a new OGR FeatureLayer from the specified SchemaDef.
         """
@@ -127,8 +127,7 @@ class OgrFeatureLayer(object):
 
         # Create FeatureLayer.
         driver_name = driver.GetName()
-        options = []
-        feature_store = driver.CreateDataSource(connection_string, options=options)
+        feature_store = driver.CreateDataSource(connection_string, options=format_options)
         feature_layer = feature_store.CreateLayer(layer_name, srs=spatial_ref, geom_type=geometry_type)
 
         for field_def in schema_def.fields:

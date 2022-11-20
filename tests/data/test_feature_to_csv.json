@@ -1,0 +1,13 @@
+{
+  "pipeline": [
+    {
+      "type": "FeatureReader",
+      "connectionString": "${TEST_DATA_PATH}/S2L2A-polygon.geojson"
+    },
+    {
+      "type": "FeatureWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.csv",
+      "formatOptions": ["GEOMETRY=AS_WKT"]
+    }
+  ]
+}

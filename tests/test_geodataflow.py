@@ -238,6 +238,22 @@ class TestGeodataFlow(unittest.TestCase):
         self.process_pipeline(test_func, pipeline_file)
         pass
 
+    def test_feature_to_csv(self):
+        """
+        Test GeometryTransform module.
+        """
+        pipeline_file = os.path.join(DATA_FOLDER, 'test_feature_to_csv.json')
+
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Feature')
+            self.assertEqual(feature.geometry.geom_type, 'MultiPolygon')
+
+        self.process_pipeline(test_func, pipeline_file)
+        pass
+
     def test_eo_stac_catalog(self):
         """
         Test EOProductCatalog module (STAC provider).

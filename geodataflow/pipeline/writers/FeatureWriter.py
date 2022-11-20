@@ -46,6 +46,7 @@ class FeatureWriter(AbstractWriter):
         AbstractWriter.__init__(self)
         self._featureStore = None
         self.connectionString = ''
+        self.formatOptions = []
 
     def description(self) -> str:
         """
@@ -66,10 +67,14 @@ class FeatureWriter(AbstractWriter):
         return {
             'connectionString': {
                 'description':
-                    "Connection string of the FeatureStore ('.geojson', '.gpkg', '.shp.zip' are supported).",
+                    "Connection string of the FeatureStore ('.geojson', '.gpkg', '.shp.zip' and '.csv' are supported).",
                 'dataType': 'string',
                 'default': 'output.gpkg',
-                'extensions': ['.geojson', '.gpkg', '.shp.zip']
+                'extensions': ['.geojson', '.gpkg', '.shp.zip', '.csv']
+            },
+            'formatOptions': {
+                'description': 'OGR format options of output Feature Layer (Optional).',
+                'dataType': 'string'
             }
         }
 
@@ -87,8 +92,11 @@ class FeatureWriter(AbstractWriter):
         from geodataflow.geoext.featurestore import OgrFeatureStore
         self._featureStore = OgrFeatureStore()
 
+        format_options = self.formatOptions or []
+        format_options = format_options.split(' ') if isinstance(format_options, str) else format_options
+
         # Create the FeatureStore.
-        schema_def = self._featureStore.create(self.connectionString, schema_def)
+        schema_def = self._featureStore.create(self.connectionString, schema_def, format_options)
         return schema_def
 
     def run(self, feature_store, processing_args):

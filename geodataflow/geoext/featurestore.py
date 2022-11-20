@@ -132,7 +132,7 @@ class OgrFeatureStore:
         #
         return self._layers[0].get_schema_def()
 
-    def create(self, connection_string: str, schema_def: SchemaDef) -> SchemaDef:
+    def create(self, connection_string: str, schema_def: SchemaDef, format_options: List[str] = []) -> SchemaDef:
         """
         Creates a new OGR FeatureStore for the specified ConnectionString and SchemaDef.
         """
@@ -142,7 +142,7 @@ class OgrFeatureStore:
                 raise Exception('The OGR Driver of "{}" does not support Data creation!'.format(item_string))
 
             layer_obj = \
-                OgrFeatureLayer.create_layer(item_string, DataUtils.get_layer_name(item_string), schema_def)
+                OgrFeatureLayer.create_layer(item_string, DataUtils.get_layer_name(item_string), schema_def, format_options)
 
             self._layers.append(layer_obj)
             break
@@ -201,6 +201,7 @@ class OgrFeatureStore:
 
         ogr_layer = feature_layer.layer()
         ogr_schema_def = ogr_layer.GetLayerDefn()
+        write_geoms = ogr_schema_def.GetGeomFieldCount() > 0
         ogr_layer.StartTransaction()
 
         for feature in features:
@@ -212,7 +213,8 @@ class OgrFeatureStore:
             if fid is not None:
                 ogr_feature.SetFID(fid)
 
-            ogr_feature.SetGeometry(geometry)
+            if write_geoms:
+                ogr_feature.SetGeometry(geometry)
 
             for k, v in feature.properties.items():
                 i = ogr_feature.GetFieldIndex(k)
