@@ -713,6 +713,7 @@ class PipelineManager:
             input_schemas.append(function_args[0])
 
         if hasattr(module_obj, 'pipeline_args'):
+            module_obj.pipeline_args.calling_count += 1
             return [module_obj.pipeline_args.schema_def, module_obj.pipeline_args.data_source]
         if len(input_schemas) > 1:
             function_args[0] = SchemaDef.merge_all(input_schemas)
@@ -729,7 +730,8 @@ class PipelineManager:
             'pipeline': self,
             'data_source': parent_obj,
             'schema_def': schema_def,
-            'processing_args': processing_args
+            'processing_args': processing_args,
+            'calling_count': 1
         })())
         return [schema_def, module_obj]
 
@@ -738,8 +740,11 @@ class PipelineManager:
         Finalization of task for each Pipeline operation.
         """
         if hasattr(module_obj, 'pipeline_args'):
-            module_obj.finished_run(self, processing_args)
-            delattr(module_obj, 'pipeline_args')
+            module_obj.pipeline_args.calling_count -= 1
+
+            if module_obj.pipeline_args.calling_count == 0:
+                module_obj.finished_run(self, processing_args)
+                delattr(module_obj, 'pipeline_args')
 
         for obj in module_obj.ti_.inputs.values():
             self._invoke_finished_run(obj, processing_args)

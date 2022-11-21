@@ -223,7 +223,7 @@
             let inputNodeId = connections[i].node;
             value = value.length > 0 ? ',' + inputNodeId : inputNodeId;
             let inputOp = editor.getNodePipeline(inputNodeId, pipelineStream);
-            pipelineStream.push(inputOp);
+            pipelineStream.pushUnique(inputOp);
           }
           nodeOp[key] = value;
         }
@@ -262,15 +262,15 @@
             'outputStageId': nodeId,
             'stages': inputOps.map(op => op.stageId)
           };
-          inputOps.forEach((op) => { op['outputStageId'] = joinOp.stageId; pipelineStream.push(op); });
+          inputOps.forEach((op) => { op['outputStageId'] = joinOp.stageId; pipelineStream.pushUnique(op); });
           nodeOp['inputStageId'] = joinOp.stageId;
-          pipelineStream.push(joinOp);
+          pipelineStream.pushUnique(joinOp);
           // alert(JSON.stringify(joinOp, undefined, 2));
         }
         else {
           inputOp = inputOps[0];
           nodeOp['inputStageId'] = inputOp.stageId;
-          pipelineStream.push(inputOp);
+          pipelineStream.pushUnique(inputOp);
         }
       }
       // alert(JSON.stringify(nodeOp, undefined, 2));
@@ -362,9 +362,26 @@
       return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
 
+    // Extends Array class with push method checking duplicates.
+    class UniqueArray extends Array {
+      constructor(uniqueKey) {
+        super();
+        this.uniqueKey = uniqueKey;
+      };
+      pushUnique = function(item) {
+        let newKey = item[this.uniqueKey];
+
+        for (let i = 0; i < this.length; i++) {
+          let key = this[i][this.uniqueKey];
+          if (key == newKey) { return -1; }
+        }
+        return this.push(item);
+      };
+    };
+
     // Create Pipeline graph of operations for specified Workflow.
     function toPipeline(workflow) {
-      let pipeline = [];
+      let pipeline = new UniqueArray('stageId');
       let writers = Object.entries(workflow).filter(([k,v]) => v.class=='writer');
 
       // Write graph from available list of Writers.
