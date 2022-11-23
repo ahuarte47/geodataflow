@@ -31,8 +31,9 @@
 ===============================================================================
 """
 
+from collections import OrderedDict
 from datetime import date, datetime
-from typing import Any, List
+from typing import Any, List, Iterable
 
 
 class DataType(object):
@@ -178,6 +179,17 @@ class FieldDef:
         new_obj = FieldDef(name=self.name, data_type=self.type)
         new_obj.copy(self)
         return new_obj
+
+    @staticmethod
+    def concat(fields1: Iterable["FieldDef"], fields2: Iterable["FieldDef"]) -> List["FieldDef"]:
+        """
+        Concat the specified stream of Fields in one unique array.
+        """
+        result = OrderedDict({fd.name: fd for fd in fields1})
+        for fd in fields2:
+            result[fd.name] = fd
+
+        return [fd for _, fd in result.items()]
 
 
 class SchemaDef:

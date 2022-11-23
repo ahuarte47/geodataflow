@@ -6,3 +6,4 @@ shapely
 GDAL
 pandas
 geopandas
+matplotlib

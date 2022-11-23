@@ -389,6 +389,26 @@ class TestGeodataFlow(unittest.TestCase):
         self.process_pipeline(test_func, pipeline_file)
         pass
 
+    def test_raster_plot_timeseries(self):
+        """
+        Test RasterStats module.
+        """
+        pipeline_file = os.path.join(DATA_FOLDER, 'test_raster_plot_timeseries.json')
+
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 1)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Raster')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            dataset = feature.dataset()
+            self.assertEqual(dataset.RasterCount, 4)
+            self.assertEqual(dataset.RasterXSize, 800)
+            self.assertEqual(dataset.RasterYSize, 600)
+
+        self.process_pipeline(test_func, pipeline_file)
+        pass
+
     def test_schema_of_stage(self):
         """
         Test reading the Schema of a Stage.

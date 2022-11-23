@@ -55,7 +55,7 @@ class RasterCalc(AbstractFilter):
         """
         Returns the Description text of this Module.
         """
-        return 'Performs raster calc algebraical operations to input Rasters.'
+        return 'Performs raster calc algebraic operations to input Rasters.'
 
     def category(self) -> str:
         """

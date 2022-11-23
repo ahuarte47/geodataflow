@@ -119,7 +119,9 @@ class GdalDataset:
         Returns the Properties of this Dataset.
         """
         info = self.get_metadata()
-        return {field_def.name: info.get(field_def.name) for field_def in DATASET_DEFAULT_SCHEMA_DEF}
+        data = {field_def.name: info.get(field_def.name) for field_def in DATASET_DEFAULT_SCHEMA_DEF}
+        data.update(self.user_data)
+        return data
 
     def env(self) -> GdalEnv:
         """
@@ -218,6 +220,10 @@ class GdalDataset:
         Returns the EPSG SRID code of the this Dataset.
         """
         spatial_wkt = self._dataset.GetProjection()
+
+        if not spatial_wkt:
+            return 0
+
         spatial_ref = osr.SpatialReference()
         spatial_ref.ImportFromWkt(spatial_wkt)
 

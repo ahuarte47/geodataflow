@@ -98,13 +98,18 @@ class EOProductDataset(EOProductCatalog):
         """
         Starting a new Workflow on Geospatial data.
         """
-        from geodataflow.core.schemadef import GeometryType
+        from geodataflow.core.schemadef import GeometryType, DataType, FieldDef
         from geodataflow.geoext.dataset import DATASET_DEFAULT_SCHEMA_DEF
+
+        new_fields = [
+            FieldDef("productType", DataType.String),
+            FieldDef("productDate", DataType.String)
+        ]
 
         schema_def = EOProductCatalog.starting_run(self, schema_def, pipeline, processing_args)
         schema_def = schema_def.clone()
         schema_def.geometryType = GeometryType.Polygon
-        schema_def.fields = DATASET_DEFAULT_SCHEMA_DEF.copy()
+        schema_def.fields = FieldDef.concat(DATASET_DEFAULT_SCHEMA_DEF, new_fields)
         return schema_def
 
     def run(self, feature_store, processing_args):
@@ -199,9 +204,8 @@ class EOProductDataset(EOProductCatalog):
                 logging.info('Done!')
 
                 for dataset in datasets:
-                    dataset.user_data['areaOfInterest'] = products[0].areaOfInterest
-                    dataset.user_data['product_type'] = self.product
-                    dataset.user_data['product_date'] = product_date
+                    dataset.user_data['productType'] = self.product
+                    dataset.user_data['productDate'] = product_date
                     yield dataset
             #
         pass
