@@ -119,6 +119,8 @@ Demo videos:
 * [Tranforming Features](https://www.youtube.com/watch?v=IJljavT-BZg&list=PLEmI_ksy4QHaAg64XbwnHFpwaLc8Hbr4-&index=2)
 * [Reading items from a STAC Catalog](https://www.youtube.com/watch?v=XUJVZaMEDtc&list=PLEmI_ksy4QHaAg64XbwnHFpwaLc8Hbr4-&index=3)
 * [Downloading a NDVI raster from a STAC Catalog](https://www.youtube.com/watch?v=NodnUUYZJkU&list=PLEmI_ksy4QHaAg64XbwnHFpwaLc8Hbr4-&index=4)
+* [Filtering Features applying Spatial Relations](https://www.youtube.com/watch?v=5OxrXffwUeM&list=PLEmI_ksy4QHaAg64XbwnHFpwaLc8Hbr4-&index=5)
+* [Plotting a NDVI Time Series Graph of a polygon](https://www.youtube.com/watch?v=qKuUW-PXizg&list=PLEmI_ksy4QHaAg64XbwnHFpwaLc8Hbr4-&index=6)
 
 ## REST WebAPI
 
