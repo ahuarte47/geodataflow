@@ -43,6 +43,13 @@ class ProductDriverApi:
     def __init__(self):
         pass
 
+    @staticmethod
+    def is_available() -> bool:
+        """
+        Indicates that this Module is available for use, some modules may depend on the availability of other third-party packages.
+        """
+        return True
+
     def name(self) -> str:
         """
         Returns the Name of the Driver.

@@ -37,6 +37,7 @@ from typing import Dict, Iterable
 
 from geodataflow.core.common import CaseInsensitiveDict
 from geodataflow.pipeline.basictypes import AbstractFilter
+from geodataflow.eogeo.productcatalog import ProductCatalog
 
 
 class EOProductCatalog(AbstractFilter):
@@ -77,13 +78,16 @@ class EOProductCatalog(AbstractFilter):
         """
         Returns the declaration of parameters supported by this Module.
         """
+        eo_catalog = ProductCatalog()
+        drivers = [driver.name().upper() for driver in eo_catalog.available_drivers()]
+
         return {
             'driver': {
                 'description': 'Driver class name that implements EO Providers.',
                 'dataType': 'string',
                 'default': 'STAC',
-                'options': ['STAC', 'EODAG'],
-                'labels': ['STAC', 'EODAG']
+                'options': drivers,
+                'labels': drivers
             },
             'provider': {
                 'description': 'Provider name or API Endpoint that provides info about EO Products.',
@@ -168,7 +172,6 @@ class EOProductCatalog(AbstractFilter):
                 product_filter[pair[0].strip()] = pair[1].strip()
 
         # Search available EO products according the current AOI-TimeRange criteria.
-        from geodataflow.eogeo.productcatalog import ProductCatalog
         eo_catalog = ProductCatalog()
 
         # Transform Geometries to EPSG:4326 for searching EO Products?

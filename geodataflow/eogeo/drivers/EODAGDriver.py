@@ -33,6 +33,7 @@
 
 import os
 import datetime
+import importlib
 from typing import Dict, Iterable
 
 from geodataflow.eogeo.productcatalog import ProductDriverApi
@@ -44,6 +45,14 @@ class EODAGDriver(ProductDriverApi):
     """
     def __init__(self):
         ProductDriverApi.__init__(self)
+
+    @staticmethod
+    def is_available() -> bool:
+        """
+        Indicates that this Module is available for use, some modules may depend on the availability of other third-party packages.
+        """
+        eodag_spec = importlib.util.find_spec('eodag')
+        return eodag_spec is not None
 
     def name(self) -> str:
         """

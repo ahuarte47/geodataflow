@@ -88,6 +88,13 @@ class AbstractModule(Iterable):
             self.run(pipeline_args.data_source, processing_args), self, pipeline_args, processing_args
         )
 
+    @staticmethod
+    def is_available() -> bool:
+        """
+        Indicates that this Module is available for use, some modules may depend on the availability of other third-party packages.
+        """
+        return True
+
     def alias(self) -> str:
         """
         Returns the Human alias-name of this Module.

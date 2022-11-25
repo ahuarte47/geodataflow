@@ -136,6 +136,14 @@ To install the latest stable version:
 > pip install geodataflow[eodag]
 ```
 
+Optional extras:
+
+* EODAG
+
+  EODAG - [Earth Observation Data Access Gateway](https://eodag.readthedocs.io/en/stable/) is a Python package for searching and downloading remotely sensed images while offering an unified API for data access regardless of the data provider.
+
+  Installing this extra _EODAG_ adds access to more EO Products from different providers to `EOProductCatalog` and `EOProductDataset` modules.
+
 From source repository:
 ```bash
 > git clone https://github.com/ahuarte47/geodataflow.git

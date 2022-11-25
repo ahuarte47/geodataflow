@@ -97,6 +97,9 @@ class ModuleManager:
                         if hasattr(type_def, '__abstractmethods__') and type_def.__abstractmethods__:
                             continue
 
+                        if hasattr(type_def, 'is_available') and not type_def.is_available():
+                            continue
+
                         type_name = type_name.lower()
                         self.modules[type_name] = type_def
 
