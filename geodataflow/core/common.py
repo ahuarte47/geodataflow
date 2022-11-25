@@ -33,6 +33,7 @@
 
 import json
 import datetime
+from typing import Tuple
 
 
 class CaseInsensitiveDict(dict):
@@ -83,3 +84,50 @@ class JSONDateTimeEncoder(json.JSONEncoder):
             return obj.strftime('%Y-%m-%d')
 
         return json.JSONEncoder.default(self, obj)
+
+
+class DateUtils:
+    """
+    Provides useful methods to manage Datetimes.
+    """
+    @staticmethod
+    def parse_date_range(startDate: str = None,
+                         endDate: str = None,
+                         closestToDate: str = None,
+                         windowDate: int = 10) -> Tuple[datetime.datetime, datetime.datetime]:
+        """
+        Returns a Date range according to the specified criteria.
+        """
+        today_date = datetime.date.today()
+
+        if isinstance(startDate, str):
+            start_date = today_date \
+                if startDate.upper() == '$TODAY()' \
+                else datetime.datetime.strptime(startDate, '%Y-%m-%d')
+
+        elif startDate is None and closestToDate:
+            temps_time = datetime.datetime.strptime(closestToDate, '%Y-%m-%d')
+            start_date = closestToDate \
+                if not windowDate \
+                else (temps_time - datetime.timedelta(days=windowDate)).strftime('%Y-%m-%d')
+
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+        else:
+            start_date = startDate if startDate else today_date
+
+        if isinstance(endDate, str):
+            final_date = today_date \
+                if endDate.upper() == '$TODAY()' \
+                else datetime.datetime.strptime(endDate, '%Y-%m-%d')
+
+        elif startDate is None and closestToDate:
+            temps_time = datetime.datetime.strptime(closestToDate, '%Y-%m-%d')
+            final_date = closestToDate \
+                if not windowDate \
+                else (temps_time + datetime.timedelta(days=windowDate)).strftime('%Y-%m-%d')
+
+            final_date = datetime.datetime.strptime(final_date, '%Y-%m-%d')
+        else:
+            final_date = endDate if endDate else today_date
+
+        return start_date, final_date

@@ -140,7 +140,7 @@ class EOProductDataset(EOProductCatalog):
 
             # Group EO Products by Date.
             for product in EOProductCatalog.run(self, feature_store, processing_args):
-                product_date = product.properties.get('gdf:product_date')
+                product_date = product.properties.get('productDate')
 
                 curr_list = product_groups.get(product_date, [])
                 curr_list.append(product)

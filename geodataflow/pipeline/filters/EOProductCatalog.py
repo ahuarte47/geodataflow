@@ -35,7 +35,7 @@ import logging
 import datetime
 from typing import Dict, Iterable
 
-from geodataflow.core.common import CaseInsensitiveDict
+from geodataflow.core.common import CaseInsensitiveDict, DateUtils
 from geodataflow.pipeline.basictypes import AbstractFilter
 from geodataflow.eogeo.productcatalog import ProductCatalog
 
@@ -131,39 +131,10 @@ class EOProductCatalog(AbstractFilter):
 
     def fetch_products(self, geometry, input_crs, app_config: Dict, limit: int = 1000) -> Iterable:
         """
-        Ferch EO Products using current settings.
+        Fetch EO Products using current settings.
         """
-        today_date = datetime.date.today()
-
-        if isinstance(self.startDate, str):
-            start_date = today_date \
-                if self.startDate.upper() == '$TODAY()' \
-                else datetime.datetime.strptime(self.startDate, '%Y-%m-%d')
-
-        elif self.startDate is None and self.closestToDate:
-            temps_time = datetime.datetime.strptime(self.closestToDate, '%Y-%m-%d')
-            start_date = self.closestToDate \
-                if not self.windowDate \
-                else (temps_time - datetime.timedelta(days=self.windowDate)).strftime('%Y-%m-%d')
-
-            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-        else:
-            start_date = self.startDate if self.startDate else today_date
-
-        if isinstance(self.endDate, str):
-            final_date = today_date \
-                if self.endDate.upper() == '$TODAY()' \
-                else datetime.datetime.strptime(self.endDate, '%Y-%m-%d')
-
-        elif self.startDate is None and self.closestToDate:
-            temps_time = datetime.datetime.strptime(self.closestToDate, '%Y-%m-%d')
-            final_date = self.closestToDate \
-                if not self.windowDate \
-                else (temps_time + datetime.timedelta(days=self.windowDate)).strftime('%Y-%m-%d')
-
-            final_date = datetime.datetime.strptime(final_date, '%Y-%m-%d')
-        else:
-            final_date = self.endDate if self.endDate else today_date
+        start_date, final_date = \
+            DateUtils.parse_date_range(self.startDate, self.endDate, self.closestToDate, self.windowDate)
 
         product_filter = dict()
         if self.filter:
@@ -211,7 +182,8 @@ class EOProductCatalog(AbstractFilter):
         app_config = pipeline.config
         field_dict = {f.name: f for f in schema_def.fields}
         new_fields = [
-            FieldDef(name='gdf:product_date', data_type=DataType.String)
+            FieldDef(name='productType', data_type=DataType.String),
+            FieldDef(name='productDate', data_type=DataType.String)
         ]
         for product in self.fetch_products(geometry, schema_def.crs, app_config, limit=1):
             properties = product.properties
@@ -278,12 +250,12 @@ class EOProductCatalog(AbstractFilter):
             ]
             logging.info("Available {} EO Products for type '{}'.".format(len(eo_products), self.product))
 
-            available_dates = set([product.properties.get('gdf:product_date') for product in eo_products])
+            available_dates = set([product.properties.get('productDate') for product in eo_products])
             report_info['availableDates'] = list(available_dates)
 
             # Return results.
             for product in self.pass_products(eo_products):
-                report_info['selectedDate'] = product.properties.get('gdf:product_date')
+                report_info['selectedDate'] = product.properties.get('productDate')
                 if inv_transform_fn:
                     product.geometry = inv_transform_fn(product.geometry)
 
@@ -307,7 +279,7 @@ class EOProductCatalog(AbstractFilter):
             temp_list = list()
 
             for product in products:
-                product_date = product.properties.get('gdf:product_date')
+                product_date = product.properties.get('productDate')
                 product_time = datetime.datetime.strptime(product_date, '%Y-%m-%d')
                 product_diff = abs(product_time - closest_time).days
                 temp_list.append((product_date, product_time, product_diff))
@@ -329,6 +301,9 @@ class EOProductCatalog(AbstractFilter):
         case_props = CaseInsensitiveDict(product.properties)
         attributes = feature.properties.copy()
 
+        for name, value in product.properties.items():
+            attributes[name] = value if not isinstance(value, list) else ','.join([str(v) for v in value])
+
         product_date = \
             case_props.get('startTimeFromAscendingNode') or \
             case_props.get('beginPosition') or \
@@ -336,10 +311,8 @@ class EOProductCatalog(AbstractFilter):
             case_props.get('publicationDate') or \
             case_props.get('datetime')
 
-        attributes['gdf:product_date'] = product_date[0:10]
-
-        for name, value in product.properties.items():
-            attributes[name] = value if not isinstance(value, list) else ','.join([str(v) for v in value])
+        attributes['productType'] = self.product
+        attributes['productDate'] = product_date[0:10]
 
         product.areaOfInterest = feature
         product.properties = attributes
