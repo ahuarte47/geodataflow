@@ -46,7 +46,8 @@ class ProductDriverApi:
     @staticmethod
     def is_available() -> bool:
         """
-        Indicates that this Module is available for use, some modules may depend on the availability of other third-party packages.
+        Indicates that this Module is available for use, some modules may depend
+        on the availability of other third-party packages.
         """
         return True
 
