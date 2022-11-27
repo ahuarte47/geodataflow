@@ -54,7 +54,7 @@ def search_gee_datasets() -> List[Dict]:
         datasets = [dataset for dataset in catalog_list if dataset['type'] == 'image_collection']
         datasets = sorted(datasets, key=lambda obj: obj['title'], reverse=False)
         return datasets
-    except:
+    except Exception:
         return []
 
 
@@ -274,7 +274,7 @@ class GEEProductCatalog(AbstractFilter):
             # Authenticates and initializes Earth Engine.
             try:
                 ee.Initialize()
-            except Exception as e:
+            except Exception:
                 # Get credentials:
                 # https://developers.google.com/earth-engine/guides/python_install-conda#get_credentials
                 ee.Authenticate()
@@ -304,8 +304,8 @@ class GEEProductCatalog(AbstractFilter):
             scales = band_names.map(lambda b: image.select([b]).projection().nominalScale())
             scale = ee.Algorithms.If(scales.distinct().size().gt(1),
                                      ee.Dictionary.fromLists(ee.List(band_names), scales),
-                                     scales.get(0)
-            )
+                                     scales.get(0))
+
             dictionary = dictionary.set('system:band_scales', scale)
             return dictionary
 

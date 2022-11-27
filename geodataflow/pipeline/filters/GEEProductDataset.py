@@ -140,8 +140,6 @@ class GEEProductDataset(GEEProductCatalog):
                 pair = item.split('=')
                 ee_config_options[pair[0].strip()] = pair[1].strip() if len(pair) > 1 else ''
 
-        ee = self.ee_initialize()
-
         # Query & fetch GEE imagery from Google Earth Engine...
         with GdalEnv(config_options=ee_config_options, temp_path=processing_args.temp_data_path()) as ee_env:
             #
@@ -157,9 +155,7 @@ class GEEProductDataset(GEEProductCatalog):
                 band_scales = image_props['system:band_scales']
 
                 # For each Date, get the mosaic the subset of GEE images.
-                for product_date, ee_subset in \
-                    self.ee_enumerate_subsets(ee_dataset, ee_dataset_props, ee_image_props):
-
+                for product_date, ee_subset in self.ee_enumerate_subsets(ee_dataset, ee_dataset_props, ee_image_props):
                     if self.bands:
                         bands = self.bands.replace(' ', '').split(',') if isinstance(self.bands, str) else self.bands
                         ee_subset = ee_subset.select(bands)
@@ -186,7 +182,7 @@ class GEEProductDataset(GEEProductCatalog):
                             factor_count -= 1
                             url = ee_subset.getDownloadURL(params)
                             break
-                        except Exception as e:
+                        except Exception:
                             factor_scale *= 2
                             url = None
 
