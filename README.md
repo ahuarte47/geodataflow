@@ -133,7 +133,7 @@ GeodataFlow provides a [WebAPI](api/README.md) based on FastAPI to access to Geo
 
 To install the latest stable version:
 ```bash
-> pip install geodataflow[eodag]
+> pip install geodataflow[eodag,gee]
 ```
 
 Optional extras:
@@ -143,6 +143,12 @@ Optional extras:
   EODAG - [Earth Observation Data Access Gateway](https://eodag.readthedocs.io/en/stable/) is a Python package for searching and downloading remotely sensed images while offering an unified API for data access regardless of the data provider.
 
   Installing this extra _EODAG_ adds access to more EO Products from different providers to `EOProductCatalog` and `EOProductDataset` modules.
+
+* GEE
+
+  GEE - [Google Earth Engine API](https://developers.google.com/earth-engine) is a geospatial processing service. With _Earth Engine_, you can perform geospatial processing at scale, powered by Google Cloud Platform. _GEE_ requires authentication, please, read available documentation [here](https://developers.google.com/earth-engine/guides/python_install#authentication).
+
+  Installing this extra _GEE_ makes possible the access to Google Cloud Platform to `GEEProductCatalog` and `GEEProductDataset` modules.
 
 From source repository:
 ```bash

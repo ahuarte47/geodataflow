@@ -448,7 +448,7 @@ class GdalDataset:
         command_line += ' --format Gtiff --co "TILED=YES" --co "COMPRESS=DEFLATE" --co "PREDICTOR=2"'
         gdal_env.run(command_line)
         #
-        return GdalDataset(calc_file, gdal_env, self.user_data.copy(), True)
+        return GdalDataset(calc_file, gdal_env, self.user_data.copy(), False)
 
     def split(self, tile_size_x: int, tile_size_y: int, padding: int = 0) -> Iterable["GdalDataset"]:
         """

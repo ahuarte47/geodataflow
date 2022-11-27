@@ -168,7 +168,7 @@ class EOProductCatalog(AbstractFilter):
 
         pass
 
-    def starting_run(self, schema_def, pipeline, processing_args):
+    def starting_run(self, schema_def, pipeline, processing_args, fetch_fields: bool = True):
         """
         Starting a new Workflow on Geospatial data.
         """
@@ -185,12 +185,13 @@ class EOProductCatalog(AbstractFilter):
             FieldDef(name='productType', data_type=DataType.String),
             FieldDef(name='productDate', data_type=DataType.String)
         ]
-        for product in self.fetch_products(geometry, schema_def.crs, app_config, limit=1):
-            properties = product.properties
+        if fetch_fields:
+            for product in self.fetch_products(geometry, schema_def.crs, app_config, limit=1):
+                properties = product.properties
 
-            for name, value in properties.items():
-                if not field_dict.get(name):
-                    new_fields.append(FieldDef(name=name, data_type=DataType.to_data_type(value)))
+                for name, value in properties.items():
+                    if not field_dict.get(name):
+                        new_fields.append(FieldDef(name=name, data_type=DataType.to_data_type(value)))
 
         schema_def = schema_def.clone()
         schema_def.geometryType = GeometryType.Polygon
@@ -301,9 +302,6 @@ class EOProductCatalog(AbstractFilter):
         case_props = CaseInsensitiveDict(product.properties)
         attributes = feature.properties.copy()
 
-        for name, value in product.properties.items():
-            attributes[name] = value if not isinstance(value, list) else ','.join([str(v) for v in value])
-
         product_date = \
             case_props.get('startTimeFromAscendingNode') or \
             case_props.get('beginPosition') or \
@@ -313,6 +311,9 @@ class EOProductCatalog(AbstractFilter):
 
         attributes['productType'] = self.product
         attributes['productDate'] = product_date[0:10]
+
+        for name, value in product.properties.items():
+            attributes[name] = value if not isinstance(value, list) else ','.join([str(v) for v in value])
 
         product.areaOfInterest = feature
         product.properties = attributes

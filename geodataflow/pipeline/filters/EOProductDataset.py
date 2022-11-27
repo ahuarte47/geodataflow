@@ -106,7 +106,7 @@ class EOProductDataset(EOProductCatalog):
             FieldDef("productDate", DataType.String)
         ]
 
-        schema_def = EOProductCatalog.starting_run(self, schema_def, pipeline, processing_args)
+        schema_def = EOProductCatalog.starting_run(self, schema_def, pipeline, processing_args, False)
         schema_def = schema_def.clone()
         schema_def.geometryType = GeometryType.Polygon
         schema_def.fields = FieldDef.concat(DATASET_DEFAULT_SCHEMA_DEF, new_fields)
@@ -128,9 +128,10 @@ class EOProductDataset(EOProductCatalog):
             'CPL_DEBUG': 'NO',
             'CPL_VSIL_CURL_ALLOWED_EXTENSIONS': '.tif,.tiff,.vrt,.ovr'
         }
-        for item in self.configVars.split(','):
-            pair = item.split('=')
-            eo_config_options[pair[0].strip()] = pair[1].strip()
+        if self.configVars:
+            for item in self.configVars.split(','):
+                pair = item.split('=')
+                eo_config_options[pair[0].strip()] = pair[1].strip() if len(pair) > 1 else ''
 
         with GdalEnv(config_options=eo_config_options, temp_path=processing_args.temp_data_path()) as eo_env:
             #

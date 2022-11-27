@@ -33,6 +33,7 @@
 import os
 import logging
 import unittest
+import importlib
 from typing import Dict, Iterable
 
 from geodataflow.core.settingsmanager import Singleton
@@ -290,6 +291,54 @@ class TestGeodataFlow(unittest.TestCase):
             self.assertEqual(metadata['rasterCount'], 2)
             self.assertAlmostEqual(metadata['pixelSizeX'], 0.000106, places=5)
             self.assertAlmostEqual(metadata['pixelSizeY'], 0.000106, places=5)
+
+        self.process_pipeline(test_func, pipeline_file)
+        pass
+
+    def test_gee_collection_catalog(self):
+        """
+        Test GEEProductCatalog module (Google Earth Engine).
+        """
+        pipeline_file = os.path.join(DATA_FOLDER, 'test_gee_collection_catalog.json')
+
+        ee_api_spec = importlib.util.find_spec('ee')
+        if ee_api_spec is None:
+            self.logger.warning('Package "earthengine-api" is not installed, skipping test.')
+            return
+
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 4)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Feature')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            self.assertEqual(GeometryUtils.get_srid(feature.geometry), 4326)
+
+        self.process_pipeline(test_func, pipeline_file)
+        pass
+
+    def test_gee_collection_dataset(self):
+        """
+        Test GEEProductDataset module (Google Earth Engine).
+        """
+        pipeline_file = os.path.join(DATA_FOLDER, 'test_gee_collection_dataset.json')
+
+        ee_api_spec = importlib.util.find_spec('ee')
+        if ee_api_spec is None:
+            self.logger.warning('Package "earthengine-api" is not installed, skipping test.')
+            return
+
+        def test_func(features):
+            """ Test results """
+            self.assertEqual(len(features), 2)
+            feature = features[0]
+            self.assertEqual(feature.type, 'Raster')
+            self.assertEqual(feature.geometry.geom_type, 'Polygon')
+            self.assertEqual(GeometryUtils.get_srid(feature.geometry), 25830)
+            dataset = feature.dataset()
+            self.assertEqual(dataset.RasterCount, 3)
+            self.assertEqual(dataset.RasterXSize, 1555)
+            self.assertEqual(dataset.RasterYSize, 999)
 
         self.process_pipeline(test_func, pipeline_file)
         pass

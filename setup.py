@@ -74,7 +74,8 @@ setup(
     dependency_links=dependency_links,
     python_requires='>=3.7',
     extras_require={
-        'eodag': ['eodag>=2.4.0']
+        'eodag': ['eodag>=2.4.0'],
+        'gee': ['earthengine-api==0.1.320']
     },
     entry_points={
         'console_scripts': ['geodataflow = geodataflow.pipelineapp:pipeline_app']

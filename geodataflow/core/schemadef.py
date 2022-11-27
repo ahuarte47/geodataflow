@@ -35,6 +35,9 @@ from collections import OrderedDict
 from datetime import date, datetime
 from typing import Any, List, Iterable
 
+MIN_INT32 = -2**31
+MAX_INT32 = 2**31-1
+
 
 class DataType(object):
     """
@@ -89,7 +92,7 @@ class DataType(object):
         Returns the DataType of the specified value.
         """
         if isinstance(value, int):
-            return DataType.Integer
+            return DataType.Integer if value > MIN_INT32 and value < MAX_INT32 else DataType.Integer64
         if isinstance(value, float):
             return DataType.Float
         if isinstance(value, str):

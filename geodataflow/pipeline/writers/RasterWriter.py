@@ -31,6 +31,7 @@
 ===============================================================================
 """
 
+import os
 import logging
 from typing import Dict
 
@@ -131,6 +132,7 @@ class RasterWriter(AbstractWriter):
 
         connection_strings = list(DataUtils.enumerate_single_connection_string(self.connectionString))
         connection_index = 0
+        connection_files = []
 
         for dataset in dataset_store:
             #
@@ -145,6 +147,10 @@ class RasterWriter(AbstractWriter):
             else:
                 connection_string = connection_strings[connection_index]
 
+            connection_files.append({
+                'output_file': connection_string,
+                'suffix': dataset.properties.get('productDate') or dataset.properties.get('suffix')
+            })
             connection_index += 1
 
             driver = GdalUtils.get_gdal_driver(connection_string) \
@@ -198,6 +204,27 @@ class RasterWriter(AbstractWriter):
 
             dataset_count += 1
             yield dataset
+
+        # Rename output files when we are getting a stream of outputs.
+        if len(connection_files) > 1:
+            layer_name = DataUtils.get_layer_name(connection_files[0]['output_file'])
+            suffixes = {}
+
+            for data_file in connection_files:
+                output_file = data_file['output_file']
+                suffix = data_file['suffix']
+
+                if suffix and os.path.exists(output_file):
+                    if suffixes.get(suffix) is not None:
+                        suffixes[suffix] += 1
+                        suffix = suffix + '_' + str(suffixes.get(suffix))
+                    else:
+                        suffixes[suffix] = 0
+
+                    target_file = DataUtils.replace_layer_name(output_file, '{}_{}'.format(layer_name, suffix))
+                    os.rename(output_file, target_file)
+
+            pass
 
         logging.info('{:,} Datasets saved to "{}".'.format(dataset_count, connection_string))
         pass

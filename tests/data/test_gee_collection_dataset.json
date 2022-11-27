@@ -1,0 +1,58 @@
+{
+  "pipeline": [
+    # Read Features from embedded GeoJson FeatureCollection.
+    {
+        "type": "FeatureReader",
+
+        "connectionString": {
+          "type": "FeatureCollection",
+          "crs": {
+            "type": "name",
+            "properties": { "name": "EPSG:4326" }
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": { "id": 0, "name": "My AOI for testing" },
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[-1.746826,42.773227],[-1.746826,42.860866],[-1.558685,42.860866],[-1.558685,42.773227],[-1.746826,42.773227]]]
+              }
+            }
+          ]
+        }
+    },
+    # Tranforms CRS of geometries of input Features.
+    {
+      "type": "GeometryTransform",
+      "sourceCrs": 4326,
+      "targetCrs": 25830
+    },
+    # Fetch footprints of GEE Datasets (Google Earth Engine) that match one SpatioTemporial criteria.
+    {
+      "type": "GEEProductDataset",
+
+      # Input parameters for "GEEProductCatalog".
+      "dataset": "COPERNICUS/S2_SR_HARMONIZED",
+
+      "startDate": "2021-09-24",
+      "endDate": "2021-10-05",
+      "closestToDate": "2021-09-30",
+      "filter": "",
+
+      "preserveInputCrs": true,
+
+      # Input parameters for "GEEProductDataset".
+      "configVars": "",
+      "bands": ["B4", "B3", "B2"],
+      "groupByDate": true,
+      "clipByAreaOfInterest": true
+    },
+    # Save Raster to Gtiff.
+    {
+      "type": "RasterWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.tif",
+      "formatOptions": [ "-of", "Gtiff", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "PREDICTOR=2" ]
+    }
+  ]
+}
