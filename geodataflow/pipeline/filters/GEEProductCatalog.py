@@ -31,9 +31,10 @@
 ===============================================================================
 """
 
+import datetime
 import importlib
 import requests
-from typing import Dict, List
+from typing import Dict, List, Iterable
 from shapely.geometry import mapping as shapely_mapping, shape as shapely_shape
 from shapely.geometry.polygon import Polygon
 from geodataflow.core.common import DateUtils
@@ -233,7 +234,7 @@ class GEEProductCatalog(AbstractFilter):
             ee_dataset = self.ee_fetch_dataset(geometry, False)
             ee_images = ee_dataset.iterate(ee_iter_function, ee.List([]))
 
-            for image_props in ee_images.getInfo():
+            for image_props in self.pass_images(ee_images.getInfo()):
                 properties = feature.properties.copy()
 
                 properties['productType'] = self.dataset
@@ -263,6 +264,31 @@ class GEEProductCatalog(AbstractFilter):
                 index += 1
 
         pass
+
+    def pass_images(self, images: Iterable[object]) -> Iterable[object]:
+        """
+        Returns only those GEE Images that match custom criteria (e.g. "closestToDate").
+        """
+        if self.closestToDate:
+            closest_time = datetime.datetime.strptime(self.closestToDate, '%Y-%m-%d')
+            temp_dict = dict()
+            temp_list = list()
+
+            for image in images:
+                product_date = image.get('IMAGE_DATE')
+                product_time = datetime.datetime.strptime(product_date, '%Y-%m-%d')
+                product_diff = abs(product_time - closest_time).days
+                temp_list.append((product_date, product_time, product_diff))
+                curr_list = temp_dict.get(product_date, [])
+                curr_list.append(image)
+                temp_dict[product_date] = curr_list
+
+            for best_item in sorted(temp_list, key=lambda tup: tup[2], reverse=False):
+                best_date = best_item[0]
+                best_list = temp_dict[best_date]
+                return best_list
+
+        return images
 
     def ee_initialize(self):
         """

@@ -221,12 +221,22 @@ class GEEProductDataset(GEEProductCatalog):
         Enumerate the GEE Image set of the ImageCollection.
         """
         ee = self.ee_initialize()
+
         dataset_props = ee_dataset_props.getInfo()
+        best_date = None
+
+        if self.closestToDate and dataset_props['count'] > 1:
+            temp_sets = [{'IMAGE_DATE': product_date} for product_date in dataset_props['dates']]
+            temp_sets = self.pass_images(temp_sets)
+            best_date = temp_sets[0].get('IMAGE_DATE')
 
         if self.groupByDate:
             for product_date in dataset_props['dates']:
                 y, m, d = \
                     int(product_date[0:4]), int(product_date[5:7]), int(product_date[8:10])
+
+                if best_date and product_date != best_date:
+                    continue
 
                 ee_subset = ee_dataset \
                     .filter(ee.Filter.calendarRange(y, y, 'year')) \
@@ -243,6 +253,11 @@ class GEEProductDataset(GEEProductCatalog):
             for i in range(0, count):
                 ee_image = ee.Image(ee_dataset.toList(count).get(i))
                 ee_product_date = ee.Date(ee_image.get('system:time_start')).format('yyyy-MM-dd')
-                yield ee_product_date.getInfo(), ee_image
+                product_date = ee_product_date.getInfo()
+
+                if best_date and product_date != best_date:
+                    continue
+
+                yield product_date, ee_image
 
         pass

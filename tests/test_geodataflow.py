@@ -308,7 +308,7 @@ class TestGeodataFlow(unittest.TestCase):
 
         def test_func(features):
             """ Test results """
-            self.assertEqual(len(features), 4)
+            self.assertEqual(len(features), 2)
             feature = features[0]
             self.assertEqual(feature.type, 'Feature')
             self.assertEqual(feature.geometry.geom_type, 'Polygon')
@@ -330,7 +330,7 @@ class TestGeodataFlow(unittest.TestCase):
 
         def test_func(features):
             """ Test results """
-            self.assertEqual(len(features), 2)
+            self.assertEqual(len(features), 1)
             feature = features[0]
             self.assertEqual(feature.type, 'Raster')
             self.assertEqual(feature.geometry.geom_type, 'Polygon')
