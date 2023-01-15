@@ -67,7 +67,7 @@ class FeatureWriter(AbstractWriter):
         return {
             'connectionString': {
                 'description':
-                    "Connection string of the FeatureStore ('.csv', '.fgb', '.geojson', '.gpkg' and '.shp.zip' are supported).",
+                    "Connection string of FeatureStore ('.csv', '.fgb', '.geojson', '.gpkg' and '.shp.zip' are supported).",
                 'dataType': 'string',
                 'default': 'output.gpkg',
                 'extensions': ['.csv', '.fgb', '.geojson', '.gpkg', '.shp.zip']

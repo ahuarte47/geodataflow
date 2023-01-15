@@ -37,6 +37,13 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
       - name: Test with unittest
         run: |
+          export PYTHONPATH=
+          export PYTHONPATH=$PYTHONPATH:geodataflow/api/
+          export PYTHONPATH=$PYTHONPATH:geodataflow/core/
+          export PYTHONPATH=$PYTHONPATH:geodataflow/spatial/
+          export PYTHONPATH=$PYTHONPATH:geodataflow/dataframes/
+          export PYTHONPATH=$PYTHONPATH:geodataflow/spark/
+          export PYTHONPATH=$PYTHONPATH:geodataflow/sql/
           python -m unittest geodataflow/core/tests/test_*.py
           python -m unittest geodataflow/spatial/tests/test_*.py
           python -m unittest geodataflow/dataframes/tests/test_*.py

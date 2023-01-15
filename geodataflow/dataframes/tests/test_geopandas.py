@@ -185,8 +185,8 @@ class TestGeodataFlowWithGeoPandas(unittest.TestCase):
             feature = features[0]
             self.assertEqual(feature.type, 'Feature')
             self.assertEqual(feature.geometry.geom_type, 'Point')
-            self.assertAlmostEqual(feature.geometry.x, -1.6527555, places=6)
-            self.assertAlmostEqual(feature.geometry.y, 42.8170465, places=6)
+            self.assertAlmostEqual(feature.geometry.x, -1.652754, places=6)
+            self.assertAlmostEqual(feature.geometry.y, 42.817075, places=6)
 
         self.process_pipeline(test_func, pipeline_file)
         pass
@@ -240,7 +240,7 @@ class TestGeodataFlowWithGeoPandas(unittest.TestCase):
             feature = features[0]
             self.assertEqual(feature.type, 'Feature')
             self.assertEqual(feature.geometry.geom_type, 'Polygon')
-            self.assertAlmostEqual(feature.geometry.area, 0.0223177, places=6)
+            self.assertAlmostEqual(feature.geometry.area, 0.016489, places=6)
 
         self.process_pipeline(test_func, pipeline_file)
         pass

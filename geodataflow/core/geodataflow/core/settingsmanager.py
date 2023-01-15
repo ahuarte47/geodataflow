@@ -70,4 +70,4 @@ global ApplicationSettings
 """
 Singleton for Application Configuration.
 """
-ApplicationSettings: SettingsManager = SettingsManager()
+ApplicationSettings = SettingsManager()

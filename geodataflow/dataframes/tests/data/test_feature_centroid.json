@@ -24,7 +24,17 @@
     },
     # Centroid of Geometries of input Features.
     {
+      "type": "GeometryTransform",
+      "sourceCrs": 4326,
+      "targetCrs": 25830
+    },
+    {
       "type": "GeometryCentroid"
+    },
+    {
+      "type": "GeometryTransform",
+      "sourceCrs": 25830,
+      "targetCrs": 4326
     },
     # Save Features to GeoPackage.
     {
