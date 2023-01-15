@@ -1,0 +1,17 @@
+# =============================================================================
+# Settings to configure the GeodataFlow Application.
+#
+#   GeodataFlow:
+#   Geoprocessing framework for geographical & Earth Observation (EO) data.
+#
+# =============================================================================
+
+# Active PipelineContext.
+PACKAGE_WITH_GEODATAFLOW_PIPELINE_CONTEXT = 'geodataflow.dataframes'
+
+# Extra path[s] of available custom Modules to use in the Pipeline manager.
+GEODATAFLOW__CUSTOM__MODULES__PATH = ''
+
+# Settings to connect to EO Providers via EODAG platform.
+EODAG__THEIA__AUTH__CREDENTIALS__IDENT = 'XXX'
+EODAG__THEIA__AUTH__CREDENTIALS__PASS  = 'YYY'

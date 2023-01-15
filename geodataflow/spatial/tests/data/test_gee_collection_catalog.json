@@ -1,0 +1,44 @@
+{
+  "pipeline": [
+    # Read Features from embedded GeoJson FeatureCollection.
+    {
+        "type": "FeatureReader",
+
+        "connectionString": {
+          "type": "FeatureCollection",
+          "crs": {
+            "type": "name",
+            "properties": { "name": "EPSG:4326" }
+          },
+          "features": [
+            {
+              "type": "Feature",
+              "properties": { "id": 0, "name": "My AOI for testing" },
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[-1.746826,42.773227],[-1.746826,42.860866],[-1.558685,42.860866],[-1.558685,42.773227],[-1.746826,42.773227]]]
+              }
+            }
+          ]
+        }
+    },
+    # Fetch footprints of GEE Datasets (Google Earth Engine) that match one SpatioTemporial criteria.
+    {
+      "type": "GEEProductCatalog",
+
+      "dataset": "COPERNICUS/S2_SR_HARMONIZED",
+
+      "startDate": "2021-09-24",
+      "endDate": "2021-10-05",
+      "closestToDate": "2021-09-30",
+      "filter": "",
+
+      "preserveInputCrs": true
+    },
+    # Save Features to GeoJson.
+    {
+      "type": "FeatureWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.geojson"
+    }
+  ]
+}

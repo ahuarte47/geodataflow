@@ -1,0 +1,19 @@
+# This file specifies requirements for the 'geodataflow.api' package.
+# -> geodataflow.core
+requests
+numpy
+# -> geodataflow.spatial
+pyproj
+shapely==1.8.*
+GDAL
+matplotlib
+# -> geodataflow.dataframes
+pandas
+geopandas
+# -> geodataflow.api
+pydantic
+SQLAlchemy
+aiopg
+aiosqlite
+fastapi
+uvicorn

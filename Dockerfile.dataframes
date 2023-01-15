@@ -1,0 +1,57 @@
+# =============================================================================
+# This Dockerfile implements a Docker container to run GeodataFlow (Geopandas).
+#
+# @Build:
+#  docker build -f ./Dockerfile.dataframes -t geodataflow/cli:1.0.0 .
+#  docker image rmi geodataflow/cli:1.0.0
+#
+# @Env:
+#  PACKAGE_WITH_GEODATAFLOW_PIPELINE_CONTEXT="geodataflow.dataframes"
+#
+# @Usage:
+#  docker run --rm --name gdf geodataflow/cli:1.0.0 --help
+#  docker run --rm --name gdf geodataflow/cli:1.0.0 --modules
+#
+# To run workflows in Linux:
+#  docker run --rm --name gdf -v "$PWD/geodataflow/dataframes/tests/data:/tests/data" geodataflow/cli:1.0.0 --pipeline_file "/tests/data/test_eo_stac_catalog.json" --pipeline.TEST_DATA_PATH "/tests/data" --pipeline.TEST_OUTPUT_PATH "/tests/data"
+# To run workflows in Windows:
+#  docker run --rm --name gdf -v "%cd%/geodataflow/dataframes/tests/data:/tests/data" geodataflow/cli:1.0.0 --pipeline_file "/tests/data/test_eo_stac_catalog.json" --pipeline.TEST_DATA_PATH "/tests/data" --pipeline.TEST_OUTPUT_PATH "/tests/data"
+#
+# For interactive process:
+#  docker run --rm -it --entrypoint "bash" geodataflow/cli:1.0.0
+#
+# =============================================================================
+
+FROM osgeo/gdal:ubuntu-small-3.6.1
+LABEL maintainer="Alvaro Huarte <ahuarte47@gmail.com>"
+
+# Active PipelineContext.
+ENV PACKAGE_WITH_GEODATAFLOW_PIPELINE_CONTEXT="geodataflow.dataframes"
+
+RUN echo "INFO: This Docker container provides the GeodataFlow CLI (Geopandas)!"
+
+RUN set -x && \
+    apt-get update && \
+    apt-get install -y python3-pip wget --no-install-recommends && \
+    apt-get autoclean && \
+    apt-get autoremove && \
+    rm -rf /var/lib/{apt,dpkg,cache,log}
+
+# Include GeodataFlow.
+COPY ./geodataflow/core/geodataflow /app/geodataflow
+COPY ./geodataflow/spatial/geodataflow /app/geodataflow
+COPY ./geodataflow/dataframes/geodataflow /app/geodataflow
+COPY ./geodataflow/dataframes/requirements-dev.txt /app/requirements.txt
+WORKDIR /app
+
+# Clean existing "__pycache__" directories.
+RUN find . -name "__pycache__" -type d -prune -exec rm -rf '{}' +
+
+# Install python dependencies.
+RUN pip3 install --no-cache-dir --requirement requirements.txt
+
+RUN echo "INFO: Everything installed!"
+RUN echo "INFO: You can run Geospatial workflows, type '--help'."
+
+# Set entrypoint.
+ENTRYPOINT ["python", "geodataflow/pipelineapp.py"]

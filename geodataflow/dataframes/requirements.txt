@@ -1,0 +1,5 @@
+# This file specifies requirements for the 'geodataflow.dataframes' package.
+geodataflow.core
+geodataflow.spatial
+pandas
+geopandas

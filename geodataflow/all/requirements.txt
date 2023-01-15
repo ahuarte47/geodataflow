@@ -1,0 +1,3 @@
+# This file specifies requirements for the 'geodataflow' platform with GDAL/OGR.
+geodataflow.core
+geodataflow.spatial

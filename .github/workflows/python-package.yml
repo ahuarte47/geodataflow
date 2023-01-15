@@ -22,10 +22,11 @@ jobs:
           sudo add-apt-repository -y ppa:ubuntugis/ppa
           sudo apt-get update
           sudo apt-get install -y gdal-bin libgdal-dev
-          python -m pip install numpy
+          python -m pip install requests numpy
+          python -m pip install pyproj shapely==1.8.* matplotlib
           python -m pip install GDAL==$(gdal-config --version)
+          python -m pip install pandas geopandas
           python -m pip install flake8 pytest
-          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           sudo add-apt-repository -y --remove ppa:ubuntugis/ppa
           sudo apt-get update
       - name: Lint with flake8
@@ -36,4 +37,6 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
       - name: Test with unittest
         run: |
-          python -m unittest tests/test_*.py
+          python -m unittest geodataflow/core/tests/test_*.py
+          python -m unittest geodataflow/spatial/tests/test_*.py
+          python -m unittest geodataflow/dataframes/tests/test_*.py

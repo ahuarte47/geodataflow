@@ -1,0 +1,23 @@
+{
+  "pipeline": [
+    # Read Features from GeoPackage.
+    {
+      "type": "FeatureReader",
+      "connectionString": "${TEST_DATA_PATH}/S2L2A-grid-sample.gpkg"
+    },
+    # Eval input Features with an expression.
+    {
+      "type": "FeatureQuery",
+      "expression": "tileId == '30TXM'"
+    },
+    {
+      "type": "FeatureEval",
+      "expression": "lowerTileId = tileId.str.lower()"
+    },
+    # Save Features to GeoPackage.
+    {
+      "type": "FeatureWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.gpkg"
+    }
+  ]
+}

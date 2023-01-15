@@ -1,0 +1,3 @@
+# This file specifies requirements for the 'geodataflow.sql' package.
+geodataflow.core
+geodataflow.spatial

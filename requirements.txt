@@ -1,9 +1,0 @@
-# This file specifies requirements of a reproducible environment to run GeodataFlow.
-numpy
-requests
-pyproj
-shapely
-GDAL
-pandas
-geopandas
-matplotlib

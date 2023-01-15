@@ -1,0 +1,31 @@
+{
+  "pipeline": [
+    {
+      "type": "RasterReader",
+      "connectionString": "${TEST_DATA_PATH}/NDVI-tiff-sample-*.tif"
+    },
+    {
+      "type": "RasterStats",
+      "stats": ["mean", "median"],
+      "polygonize": true
+    },
+    {
+      "type": "TimeseriesPlot",
+      "connectionString": "${TEST_OUTPUT_PATH}/plot.png",
+
+      # Graph properties.
+      "title": "Time series Plot",
+      "xLabel": "Date",
+      "yLabel": "NDVI",
+      "figureXSize": 800,
+      "figureYSize": 600,
+
+      # Time Series properties.
+      "label": ["Mean", "Median"],
+      "expressionValue": ["int(mean * 100)", "int(median * 100)"],
+      "attributeDate": "",
+      "dateFormatter": "%Y-%m-%d",
+      "dateRange": 10
+    }
+  ]
+}

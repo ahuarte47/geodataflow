@@ -4,8 +4,16 @@ version: "3.8"
 # docker-compose file for creating the GeodataFlow services stack in Docker.
 #
 # @Usage:
-#  sudo docker compose up
-#  sudo docker compose down --rmi all -v --remove-orphans
+#  docker compose up
+#  docker compose down --rmi all -v --remove-orphans
+#
+# @Env:
+#  PACKAGE_WITH_GEODATAFLOW_PIPELINE_CONTEXT="geodataflow.spatial"
+#
+#  Choose one:
+#  + geodataflow.spatial     GeodataFlow backend with GDAL/OGR (OSGeo).
+#  + geodataflow.dataframes  GeodataFlow backend with Geopandas (GeoDataFrame).
+#  + ...
 #
 # =============================================================================
 
@@ -15,10 +23,10 @@ services:
   api:
     container_name: geodataflow-api
 
-    image: geodataflow/pipelineapi:1.0.0
+    image: geodataflow/api:1.0.0
     build:
       context: .
-      dockerfile: ./api/Dockerfile
+      dockerfile: ./Dockerfile.api
 
     environment:
       # Folder where GeodataFlow saves outputs.
@@ -27,6 +35,8 @@ services:
       - GEODATAFLOW_API_ORIGINS=http://localhost:9640
       # Connection string of backend Database.
       - GEODATAFLOW_DATABASE_URL=sqlite+aiosqlite:////var/lib/geodataflow/data/geodataflow.db
+      # Package with active PipelineContext.
+      - PACKAGE_WITH_GEODATAFLOW_PIPELINE_CONTEXT=geodataflow.spatial
 
     volumes:
       - data-volume:/var/lib/geodataflow/data
@@ -47,7 +57,7 @@ services:
     image: geodataflow/workbench:1.0.0
     build:
       context: .
-      dockerfile: ./ui/Dockerfile
+      dockerfile: ./Dockerfile.ui
 
     environment:
       # Nginx location of outputs.

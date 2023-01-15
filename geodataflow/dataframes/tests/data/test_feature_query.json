@@ -1,0 +1,19 @@
+{
+  "pipeline": [
+    # Read Features from GeoPackage.
+    {
+      "type": "FeatureReader",
+      "connectionString": "${TEST_DATA_PATH}/S2L2A-grid-sample.gpkg"
+    },
+    # Filter input Features with a boolean expression.
+    {
+      "type": "FeatureQuery",
+      "expression": "tileId == '30TXM'"
+    },
+    # Save Features to GeoPackage.
+    {
+      "type": "FeatureWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.gpkg"
+    }
+  ]
+}

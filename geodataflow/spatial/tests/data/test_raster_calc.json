@@ -1,0 +1,21 @@
+{
+  "pipeline": [
+    # Read Raster from Gtiff file.
+    {
+        "type": "RasterReader",
+        "connectionString": "${TEST_DATA_PATH}/S2L2A-tiff-sample.tif"
+    },
+    # Calculate NDVI of input Datasets.
+    {
+      "type": "RasterCalc",
+      "bands": ["B02", "B03", "B04", "B08"],
+      "expression": "(B08 - B04) / (B08 + B04)"
+    },
+    # Save Raster to Gtiff.
+    {
+      "type": "RasterWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.tif",
+      "formatOptions": [ "-of", "Gtiff", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "PREDICTOR=2" ]
+    }
+  ]
+}

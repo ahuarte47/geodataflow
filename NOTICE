@@ -1,7 +1,7 @@
 GeodataFlow:
-Toolkit to run workflows on Geospatial & Earth Observation (EO) data.
+Geoprocessing framework for geographical & Earth Observation (EO) data.
 
-Copyright (c) 2022, Alvaro Huarte. All rights reserved.
+Copyright (c) 2022-2023, Alvaro Huarte. All rights reserved.
 
 This software is distributed under the Apache Software License (ASL) v2.0, see LICENSE
 file or http://www.apache.org/licenses/LICENSE-2.0 for details.

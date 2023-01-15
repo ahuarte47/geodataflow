@@ -1,9 +1,0 @@
-# This file specifies requirements of a reproducible environment to test GeodataFlow.
--r ./requirements.txt
-
-mypy
-flake8
-black
-jsonschema
-coverage
-doc8

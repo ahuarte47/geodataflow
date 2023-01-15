@@ -1,0 +1,33 @@
+# =============================================================================
+# This Dockerfile implements a Docker container of GeodataFlow Workbench cli.
+#
+# @Build:
+#  docker build -f ./Dockerfile.ui -t geodataflow/workbench:1.0.0 .
+#  docker image rmi geodataflow/workbench:1.0.0
+#
+# @Usage:
+#  docker run --rm -it -p 8090:9640 geodataflow/workbench:1.0.0 -> http://localhost:8090/
+#
+# =============================================================================
+
+FROM nginx:alpine
+LABEL maintainer="Alvaro Huarte <ahuarte47@gmail.com>"
+
+RUN echo "INFO: Deploying GeodataFlow Workbench webapp!"
+
+# Javascript stuff.
+COPY ./geodataflow/ui/nginx.conf /etc/nginx/nginx.conf
+COPY ./geodataflow/ui/css /usr/share/nginx/html/css
+COPY ./geodataflow/ui/images /usr/share/nginx/html/images
+COPY ./geodataflow/ui/js /usr/share/nginx/html/js
+COPY ./geodataflow/ui/workbench.html /usr/share/nginx/html
+WORKDIR /usr/share/nginx/html
+
+# Gallery items (OSGeo/Geopandas).
+COPY ./galleries/osgeo/gallery /usr/share/nginx/html/gallery
+
+RUN echo "INFO: Everything done!"
+
+# Set entrypoint.
+EXPOSE 9640
+CMD ["/bin/sh",  "-c",  "envsubst < /usr/share/nginx/html/js/env.template.js > /usr/share/nginx/html/js/env.js && exec nginx -g 'daemon off;'"]

@@ -1,0 +1,8 @@
+# This file specifies requirements for the 'geodataflow.api' package.
+geodataflow.core
+pydantic
+SQLAlchemy
+aiopg
+aiosqlite
+fastapi
+uvicorn

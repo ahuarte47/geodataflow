@@ -1,0 +1,6 @@
+# This file specifies requirements for the 'geodataflow.spatial' package.
+geodataflow.core
+pyproj
+shapely==1.8.*
+GDAL
+matplotlib

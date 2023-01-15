@@ -1,0 +1,12 @@
+{
+  "pipeline": [
+    {
+      "type": "TestReader",
+      "connectionString": "${TEST_DATA_PATH}/input.ext"
+    },
+    {
+      "type": "TestWriter",
+      "connectionString": "${TEST_OUTPUT_PATH}/output.ext"
+    }
+  ]
+}
