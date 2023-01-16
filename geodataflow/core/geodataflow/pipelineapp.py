@@ -152,8 +152,8 @@ def pipeline_app(command_args: List[str] = None):
 
     # Package name with the PipelineContext to initialize.
     PACKAGE_WITH_PIPELINE_CONTEXT: str = \
-        app_settings.get('PACKAGE_WITH_GEODATAFLOW_PIPELINE_CONTEXT') or \
-        os.environ.get('PACKAGE_WITH_GEODATAFLOW_PIPELINE_CONTEXT') or 'geodataflow.spatial'
+        os.environ.get('PACKAGE_WITH_GEODATAFLOW_PIPELINE_CONTEXT') or \
+        app_settings.get('PACKAGE_WITH_GEODATAFLOW_PIPELINE_CONTEXT') or 'geodataflow.spatial'
     PACKAGE_WITH_PIPELINE_CONTEXT = \
         PACKAGE_WITH_PIPELINE_CONTEXT.strip('"\'')
 
