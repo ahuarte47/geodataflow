@@ -67,7 +67,8 @@ class EOGdalDataset(GdalDataset):
                 return '/vsis3/' + temp_
 
             gdal = gdal_env.gdal()
-            return '/vsicurl/' + gdal.GetSignedURL(dataset_path)
+            signed_url = gdal.GetSignedURL(dataset_path)
+            return '/vsicurl/' + signed_url if signed_url else dataset_path
 
         return dataset_path
 
