@@ -51,6 +51,7 @@ from geodataflow.core.schemadef import SchemaDef
 from geodataflow.pipeline.moduledef import AbstractModule
 from geodataflow.pipeline.basictypes import AbstractReader, AbstractWriter
 from geodataflow.pipeline.pipelinecontext import PipelineContext
+from geodataflow.pipeline.datastagetypes import DataStageType
 
 
 class PipelineManager:
@@ -481,21 +482,29 @@ class PipelineManager:
         self._build_tree_pipeline()
         return self._objects
 
-    def get_schema(self, processing_args: ProcessingArgs, stageId: str) -> bool:
+    def data_of_stage(self, stage_id: str, data_type: DataStageType, processing_args: ProcessingArgs) -> bool:
         """
-        Get the Schema of a Stage in the specified pipeline of Geospatial data.
+        Get data of a Stage in the specified pipeline of Geospatial data.
         """
-        temp_list = [obj for obj in self.objects(recursive=True) if obj.stageId == stageId]
-        if not temp_list:
-            raise Exception('Stage "{}" not found in current Pipeline'.format(stageId))
+        from shapely.geometry import mapping as shapely_mapping
 
-        class DummyWriter(AbstractWriter):
+        temp_list = [obj for obj in self.objects(recursive=True) if obj.stageId == stage_id]
+        if not temp_list:
+            raise Exception('Stage "{}" not found in current Pipeline'.format(stage_id))
+
+        class DataWriter(AbstractWriter):
             """
-            DummyWriter to capture SchemaDef.
+            Writer to capture data from a Pipeline Stage.
             """
             def __init__(self):
                 AbstractWriter.__init__(self)
                 self.schema_def = None
+                self.features = []
+
+            def __del__(self):
+                AbstractWriter.__del__(self)
+                self.schema_def = None
+                self.features = None
 
             def test_capability(self, connection_string: str, capability: StoreCapabilities) -> bool:
                 """
@@ -512,34 +521,64 @@ class PipelineManager:
 
             def run(self, data_store, processing_args):
                 """
-                Doing nothing.
+                Doing something.
                 """
-                return iter([])
+                if data_type == DataStageType.SCHEMA:
+                    return iter([])
+                else:
+                    for index, row in enumerate(data_store):
+                        feature = {
+                            'type': row.type,
+                            'fid': row.fid if hasattr(row, 'fid') else index,
+                            'properties': row.properties,
+                            'geometry': shapely_mapping(row.geometry)
+                        }
+                        self.features.append(feature)
+                        yield row
+
+                    pass
+
+            def result(self):
+                """
+                Returns the data collected.
+                """
+                if data_type == DataStageType.SCHEMA:
+                    return self.schema_def
+                else:
+                    data = {
+                        'type': 'FeatureCollection',
+                        'crs': {
+                            'type': 'name',
+                            'properties': { 'name': 'EPSG:' + str(self.schema_def.srid) }
+                        },
+                        'features': self.features
+                    }
+                    return data
 
         current_list = self._objects
         try:
             new_list = list()
 
-            dummy_writer = DummyWriter()
-            dummy_writer.ti_ = type('TreeMetadata', (object,), {
+            data_writer = DataWriter()
+            data_writer.ti_ = type('TreeMetadata', (object,), {
                 'parent': None, 'children': [], 'inputs': OrderedDict(), 'outputs': OrderedDict()
             })
 
             def my_clone_of_object_function(obj) -> Iterable:
                 #
-                if obj.stageId == stageId:
+                if obj.stageId == stage_id:
                     #
                     if isinstance(obj, AbstractWriter):
-                        dummy_writer.ti_.inputs = obj.ti_.inputs.copy()
-                        yield dummy_writer
+                        data_writer.ti_.inputs = obj.ti_.inputs.copy()
+                        yield data_writer
                     else:
                         new_obj = deepcopy(obj)
                         new_obj.ti_.outputs.clear()
-                        new_obj.ti_.outputs[dummy_writer.stageId] = dummy_writer
+                        new_obj.ti_.outputs[data_writer.stageId] = data_writer
                         yield new_obj
-                        dummy_writer.ti_.inputs.clear()
-                        dummy_writer.ti_.inputs[new_obj.stageId] = new_obj
-                        yield dummy_writer
+                        data_writer.ti_.inputs.clear()
+                        data_writer.ti_.inputs[new_obj.stageId] = new_obj
+                        yield data_writer
 
                         new_obj.ti_.children.clear()
                         for child in obj.ti_.children:
@@ -559,7 +598,8 @@ class PipelineManager:
             self._objects = new_list
             self.run(processing_args)
 
-            return dummy_writer.schema_def
+            data = data_writer.result()
+            return data
         finally:
             self._objects = current_list
 

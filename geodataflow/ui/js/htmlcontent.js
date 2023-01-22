@@ -235,6 +235,46 @@ class HtmlContent {
     return moduleDiv.innerHTML;
   }
 
+  // Returns the HTML content of the specified Preview Data Table.
+  static getHtmlContentOfPreviewTable(featureCollection) {
+    let features = featureCollection.features;
+    let header = '';
+
+    // Prepare header of Table.
+    if (features.length > 0) {
+      let properties = features[0].properties;
+
+      Object.entries(properties).forEach(([key, value]) => {
+        header += `<th>${key}</th>`
+      });
+    }
+    let html = `
+      <table class="previewTable">
+        <thead>
+          <tr>
+            <th>Item ID</th>
+            ${header}
+          </tr>
+        </thead>
+        <tbody>`;
+
+    // Fill DataRows of Table.
+    features.forEach(function(feature) {
+      let properties = feature.properties;
+      let dataRow = '';
+
+      Object.entries(properties).forEach(([key, value]) => {
+        dataRow += `<td>${value}</td>`
+      });
+      html += `
+        <tr>
+          <td>${feature.fid}</td>
+          ${dataRow}
+        </tr>`;
+    });
+    return html + '</tbody></table>';
+  }
+
   // Returns the HTML content of the specified Requests Report Table.
   static getHtmlContentOfRequestsTable(reports, dataFolder = undefined, outputsPath = undefined) {
     let html = `

@@ -118,12 +118,12 @@ class GeodataFlow {
     }
   }
 
-  // Get the Schema of a Stage in the specified Geodataflow pipeline.
-  async getSchema(user_id, pipeline, stageId) {
+  // Get data (Schema, Rows) of a Stage/Object in the specified Geodataflow pipeline.
+  async getDataStage(user_id, pipeline, stageId, dataType) {
     if (this.apiUrl) {
       const payload = {'user_id': user_id, 'input': {'pipeline': pipeline}};
 
-      const response = await fetch(this.apiUrl + '/schema?stageId='+stageId, {
+      const response = await fetch(this.apiUrl + '/objects?stageId='+stageId+'&dataType='+dataType, {
         method: 'POST',
         headers: new Headers({'Content-Type': 'application/json; charset=utf-8'}),
         mode: 'cors',

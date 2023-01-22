@@ -31,39 +31,12 @@
 ===============================================================================
 """
 
-import enum
-from sqlalchemy import Column, String, DateTime, Enum
-from geodataflow.api.database import Base
+from enum import Enum
 
 
-class Status(str, enum.Enum):
+class DataStageType(str, Enum):
     """
-    Status of a Request.
+    Types to data to fetch to one Pipeline stage.
     """
-    OK = 'OK'
-    ERROR = 'ERROR'
-    WORKING = 'WORKING'
-
-
-class RequestType(str, enum.Enum):
-    """
-    Type of a Request.
-    """
-    WORKFLOW = 'WORKFLOW'
-    PROPERTY = 'PROPERTY'
-
-
-class Request(Base):
-    """
-    Database schema of a Request.
-    """
-    __tablename__ = 'requests'
-
-    workflow_id = Column(String, primary_key=True, index=True)
-    type = Column(Enum(RequestType), nullable=False, default=RequestType.WORKFLOW)
-    user_id = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    terminated_at = Column(DateTime, nullable=True)
-    status = Column(Enum(Status), nullable=False)
-    message = Column(String, nullable=True)
-    file_result = Column(String, nullable=True)
+    SCHEMA = 'SCHEMA'
+    ROWS = 'ROWS'

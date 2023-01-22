@@ -71,6 +71,7 @@
   <link rel="stylesheet" type="text/css" href="css/gallery.css" />
   <link rel="stylesheet" type="text/css" href="css/leaflet.css" />
   <link rel="stylesheet" type="text/css" href="css/requests.css" />
+  <link rel="stylesheet" type="text/css" href="css/previews.css" />
 
   <!-- DOM content -->
   <header>
@@ -104,6 +105,10 @@
       </div>
       <button type="button" class="toolButton" id="_copyButton" onclick="_copyButton_onClick(event)" title="Clone object" disabled>
         <i class="far fa-clone fa-2x"></i>
+      </button>
+      <button type="button" class="toolButton" id="_dataButton" onclick="_dataButton_onClick(event)" title="Preview of object" disabled>
+        <i class="fas fa-eye fa-2x"></i>
+        <i class="far fa-clock fa-1x buttonFlag" id="_dataButtonFlag" title=""></i>
       </button>
       <div class="separatorButton">
       </div>
@@ -393,6 +398,20 @@
       return pipeline;
     }
 
+    // Create Pipeline graph of operations for specified StageId.
+    function stageToPipeline(workflow, stageId) {
+      let pipeline = new UniqueArray('stageId');
+      let objects = Object.entries(workflow).filter(([k,v]) => k==stageId);
+
+      // Write graph from available list of Objects.
+      objects.forEach(function(nodeEntry) {
+        let nodeId = nodeEntry[0];
+        let nodeOp = editor.getNodePipeline(nodeId, pipeline);
+        pipeline.push(nodeOp);
+      });
+      return pipeline;
+    }
+
     // Download the specified JSON content as file.
     function downloadFile(filename, jsonContent) {
       const blob = new Blob([JSON.stringify(jsonContent, undefined, 2)], { type: 'text/json' });
@@ -620,6 +639,7 @@
       document.getElementById('_undoButton').disabled = true;
       document.getElementById('_redoButton').disabled = true;
       document.getElementById('_copyButton').disabled = true;
+      document.getElementById('_dataButton').disabled = true;
     }
 
     // Open workflow from file.
@@ -663,6 +683,7 @@
           document.getElementById('_undoButton').disabled = true;
           document.getElementById('_redoButton').disabled = true;
           document.getElementById('_copyButton').disabled = true;
+          document.getElementById('_dataButton').disabled = true;
         }
         catch (e) {
           let errorMessage = `Failed to read File!\n${e}`;
@@ -777,6 +798,7 @@
       document.getElementById('_undoButton').disabled = workflow.stageIndex == 0;
       document.getElementById('_redoButton').disabled = workflow.stageIndex >= workflow.stages.length - 1;
       document.getElementById('_copyButton').disabled = true;
+      document.getElementById('_dataButton').disabled = true;
     }
 
     // Clone object.
@@ -809,9 +831,74 @@
       onDataChanged('cloneNode', newNodeId);
     }
 
+    var previewCount = 0;
     var runIntervalFunc = null;
     var requestsIntervalFunc = null;
     var requestCount = 0;
+
+    // Get DataRows of object.
+    function _dataButton_onClick(event) {
+      let button = event.currentTarget;
+      let workflowName = editor.module;
+      let workflow = editor.drawflow.drawflow[workflowName].data;
+
+      let buttonFlag = document.getElementById('_dataButtonFlag');
+      let dataIntervalFunc = null;
+
+      if (previewCount > 0) {
+        let infoMessage = 'Another Preview processing is still working!\n\nPlease, wait for results.';
+        MessageBox.show(errorMessage, 'INFO', ['OK']);
+        return;
+      }
+
+      // Get DataRows of Object...
+      (async () => {
+        try {
+          previewCount += 1;
+
+          const stageId = button.selectedNodeId;
+          const pipeline = stageToPipeline(workflow, stageId);
+
+          if (pipeline.length == 0) {
+            throw new Error('There is none operation to perform. Please, check the design of your Workflow.');
+          }
+
+          dataIntervalFunc = setInterval(_blinkDataButtonFlag, 1000);
+          buttonFlag.setAttribute('title', 'Processing preview of Object...');
+          buttonFlag.style.display = 'inline-block';
+
+          // Run!
+          const response = await geodataflow.getDataStage(user_id, pipeline, stageId, 'ROWS');
+          // console.log(JSON.stringify(response));
+
+          // Everything ok?
+          const info = response.result.info;
+          if (info.status != 'OK') {
+            throw new Error(info.message);
+          }
+
+          // Show results.
+          let tableDiv = document.createElement('div');
+          tableDiv.innerHTML = HtmlContent.getHtmlContentOfPreviewTable(info.dataOfStage);
+          showModalWindow(tableDiv);
+        }
+        catch (e) {
+          let errorMessage = `Failed to process Preview of Object!\n\n${e}`;
+          MessageBox.show(errorMessage, 'ERROR', ['OK']);
+        }
+        finally {
+          previewCount -= 1;
+
+          setTimeout(() => {
+            if (previewCount == 0) {
+              if (dataIntervalFunc) { clearInterval(dataIntervalFunc); dataIntervalFunc = null; }
+              buttonFlag.setAttribute('title', '');
+              buttonFlag.style.display = 'none';
+            }
+          }, 1000);
+        }
+      })();
+    }
 
     // Run the workflow.
     function _runButton_onClick(event) {
@@ -863,6 +950,11 @@
       })();
     }
 
+    // Blinking new Preview processing.
+    function _blinkDataButtonFlag() {
+      let button = document.getElementById('_dataButtonFlag');
+      button.style.display = button.style.display == 'none' ? 'inline-block' : 'none';
+    }
     // Blinking new Request processing.
     function _blinkRunButtonFlag() {
       let button = document.getElementById('_runButtonFlag');
@@ -944,20 +1036,28 @@
     // Events!
     // ------------------------------------------------------------------------
 
-    editor.on('nodeSelected', function(id) {
+    editor.on('nodeSelected', function(nodeId) {
       // Enable 'Clone' button.
       if (editor.editor_mode !== 'fixed' && editor.editor_mode !== 'view') {
-        let button = document.getElementById('_copyButton');
-        button.selectedNodeId = id;
-        button.disabled = false;
+        let node = editor.getNodeFromId(nodeId);
+
+        let button1 = document.getElementById('_copyButton');
+        button1.selectedNodeId = nodeId;
+        button1.disabled = false;
+        let button2 = document.getElementById('_dataButton');
+        button2.selectedNodeId = nodeId;
+        button2.disabled = !['reader', 'writer', 'filter'].some(v => v == node.class);
       }
     });
-    editor.on('nodeUnselected', function(id) {
+    editor.on('nodeUnselected', function(nodeId) {
       // Disable 'Clone' button.
       if (editor.editor_mode !== 'fixed' && editor.editor_mode !== 'view') {
-        let button = document.getElementById('_copyButton');
-        button.selectedNodeId = null;
-        button.disabled = true;
+        let button1 = document.getElementById('_copyButton');
+        button1.selectedNodeId = null;
+        button1.disabled = true;
+        let button2 = document.getElementById('_dataButton');
+        button2.selectedNodeId = null;
+        button2.disabled = true;
       }
     });
     ['nodeCreated', 'nodeRemoved', 'nodeMoved', 'connectionCreated', 'connectionRemoved'].forEach((eventName) => {

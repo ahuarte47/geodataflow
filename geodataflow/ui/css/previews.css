@@ -1,0 +1,37 @@
+
+/* Elements embedded in Preview data table  */
+
+.previewTable {
+  background: white;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: left;
+  border-collapse: collapse;
+  width: 100%;
+  min-width: max-content;
+}
+
+.previewTable th, .previewTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.previewTable th {
+  position: sticky;
+  top: 0px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: rgb(70, 70, 70);
+  color: white;
+}
+
+.previewTable thead tr th:nth-child(1) {
+  width: 70px;
+}
+
+.previewTable tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+.previewTable tbody tr:hover {
+  background-color: #dfecf8;
+}

@@ -39,6 +39,7 @@ from typing import Dict, Iterable
 from geodataflow.core.settingsmanager import ApplicationSettings
 from geodataflow.pipeline.pipelinecontext import PipelineContext
 from geodataflow.pipeline.pipelinemanager import PipelineManager
+from geodataflow.pipeline.datastagetypes import DataStageType
 from geodataflow.spatial.commonutils import GeometryUtils
 from geodataflow.spatial.gdalcontext import GdalPipelineContext
 
@@ -111,7 +112,7 @@ class TestGeodataFlowWithOSGeo(unittest.TestCase):
 
         pass
 
-    def schema_of_stage(self, pipeline_file: str, stageId: str, pipeline_args: Dict[str, str] = {}) -> Dict:
+    def schema_of_stage(self, pipeline_file: str, stage_id: str, pipeline_args: Dict[str, str] = {}) -> Dict:
         """
         Get the Schema of a Stage in the specified Pipeline file.
         """
@@ -124,7 +125,7 @@ class TestGeodataFlowWithOSGeo(unittest.TestCase):
                 # Load workflow & Get Schema.
                 pipeline = PipelineManager(context=context, config=self.app_settings)
                 pipeline.load_from_file(pipeline_file, pipeline_args)
-                schema_def = pipeline.get_schema(processing_args, stageId)
+                schema_def = pipeline.data_of_stage(stage_id, DataStageType.SCHEMA, processing_args)
 
                 return schema_def
 

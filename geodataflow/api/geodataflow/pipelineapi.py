@@ -68,6 +68,7 @@ try:
     from geodataflow.core.settingsmanager import ApplicationSettings
     from geodataflow.pipeline.pipelinemanager import PipelineManager, PipelineContext
     from geodataflow.pipeline.basictypes import AbstractWriter
+    from geodataflow.pipeline.datastagetypes import DataStageType
 except Exception as e:
     raise e
 
@@ -192,7 +193,7 @@ async def get_workflows(user_id: str, db: AsyncSession = Depends(get_db)):
 
 @app.post('/api/workflows', response_model=WorkflowModel)
 async def new_workflow(
-        payload: WorkflowCreateModel, get_schema: bool = False, db: AsyncSession = Depends(get_db)):
+        payload: WorkflowCreateModel, stageId: str = None, dataType: DataStageType = None, db: AsyncSession = Depends(get_db)):
     """
     Create and run new GeodataFlow pipeline.
 
@@ -240,8 +241,8 @@ async def new_workflow(
         'end': None,
         'elapsedTime': None
     }
-    if get_schema:
-        report_context.info['schema'] = {}
+    if stageId and dataType:
+        report_context.info['dataOfStage'] = {}
 
     # Create PipelineContext for this request.
     with create_context(app_settings, PACKAGE_WITH_PIPELINE_CONTEXT) as context:
@@ -255,7 +256,7 @@ async def new_workflow(
                 # Register new Request.
                 db_request = RequestSchema(
                     workflow_id=workflow_id,
-                    type=RequestType.SCHEMA if get_schema else RequestType.WORKFLOW,
+                    type=RequestType.PROPERTY if stageId and dataType else RequestType.WORKFLOW,
                     user_id=workflow.user_id,
                     created_at=datetime.datetime.now(),
                     status=RequestStatus.WORKING
@@ -280,9 +281,9 @@ async def new_workflow(
                         writer.connectionString = os.path.join(output_folder, os.path.basename(tempString))
 
                 # Run!
-                if get_schema:
-                    schema_def = pipeline_ob.get_schema(processing_args, payload.input_args.get('stageId'))
-                    report_context.info['schema'] = schema_def
+                if stageId and dataType:
+                    data = pipeline_ob.data_of_stage(stageId, dataType, processing_args)
+                    report_context.info['dataOfStage'] = data
                 else:
                     pipeline_ob.run(processing_args)
 
@@ -341,18 +342,22 @@ async def new_workflow(
     return workflow
 
 
-@app.post('/api/schema', response_model=Dict)
-async def get_schema(payload: WorkflowCreateModel, stageId: str, db: AsyncSession = Depends(get_db)):
+@app.post('/api/objects', response_model=Dict)
+async def data_of_stage(payload: WorkflowCreateModel, stageId: str, dataType: DataStageType, db: AsyncSession = Depends(get_db)):
     """
-    Read the Schema of a Node in a GeodataFlow pipeline.
+    Get data of a Stage in a GeodataFlow pipeline.
 
     Args:
         payload: The data of the request.
+        stageId: The StageId from which data is obtained.
+        dataType: The data tyoe to ftech from a Stage.
     """
     if not stageId:
         raise HTTPException(status_code=400, detail='stageId not specified.')
+    if not dataType:
+        raise HTTPException(status_code=400, detail='dataType not specified.')
 
-    workflow = await new_workflow(payload=payload, get_schema=True, db=db)
+    workflow = await new_workflow(payload=payload, stageId=stageId, dataType=dataType, db=db)
     return workflow
 
 
