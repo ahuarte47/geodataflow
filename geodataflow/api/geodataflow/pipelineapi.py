@@ -343,7 +343,8 @@ async def new_workflow(
 
 
 @app.post('/api/objects', response_model=Dict)
-async def data_of_stage(payload: WorkflowCreateModel, stageId: str, dataType: DataStageType, db: AsyncSession = Depends(get_db)):
+async def data_of_stage(
+        payload: WorkflowCreateModel, stageId: str, dataType: DataStageType, db: AsyncSession = Depends(get_db)):
     """
     Get data of a Stage in a GeodataFlow pipeline.
 

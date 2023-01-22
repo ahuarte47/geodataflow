@@ -482,84 +482,85 @@ class PipelineManager:
         self._build_tree_pipeline()
         return self._objects
 
+    class _DataStageWriter(AbstractWriter):
+        """
+        Writer to capture data from a Pipeline Stage.
+        """
+        def __init__(self, data_type: DataStageType):
+            AbstractWriter.__init__(self)
+            self.data_type = data_type
+            self.schema_def = None
+            self.features = []
+
+        def __del__(self):
+            AbstractWriter.__del__(self)
+            self.schema_def = None
+            self.features = None
+
+        def test_capability(self, connection_string: str, capability: StoreCapabilities) -> bool:
+            """
+            Returns always True for this DummyWriter.
+            """
+            return True
+
+        def starting_run(self, schema_def, pipeline, processing_args):
+            """
+            Capture SchemaDef.
+            """
+            self.schema_def = schema_def.clone()
+            return schema_def
+
+        def run(self, data_store, processing_args):
+            """
+            Doing something.
+            """
+            if self.data_type == DataStageType.SCHEMA:
+                return iter([])
+            else:
+                from shapely.geometry import mapping as shapely_mapping
+
+                for index, row in enumerate(data_store):
+                    feature = {
+                        'type': row.type,
+                        'fid': row.fid if hasattr(row, 'fid') else index,
+                        'properties': row.properties,
+                        'geometry': shapely_mapping(row.geometry)
+                    }
+                    self.features.append(feature)
+                    yield row
+
+                pass
+
+        def result(self):
+            """
+            Returns the data collected.
+            """
+            if self.data_type == DataStageType.SCHEMA:
+                return self.schema_def
+            else:
+                data = {
+                    'type': 'FeatureCollection',
+                    'crs': {
+                        'type': 'name',
+                        'properties': {'name': 'EPSG:' + str(self.schema_def.srid)}
+                    },
+                    'features': self.features
+                }
+                return data
+
     def data_of_stage(self, stage_id: str, data_type: DataStageType, processing_args: ProcessingArgs) -> bool:
         """
         Get data of a Stage in the specified pipeline of Geospatial data.
         """
-        from shapely.geometry import mapping as shapely_mapping
-
         temp_list = [obj for obj in self.objects(recursive=True) if obj.stageId == stage_id]
         if not temp_list:
             raise Exception('Stage "{}" not found in current Pipeline'.format(stage_id))
-
-        class DataWriter(AbstractWriter):
-            """
-            Writer to capture data from a Pipeline Stage.
-            """
-            def __init__(self):
-                AbstractWriter.__init__(self)
-                self.schema_def = None
-                self.features = []
-
-            def __del__(self):
-                AbstractWriter.__del__(self)
-                self.schema_def = None
-                self.features = None
-
-            def test_capability(self, connection_string: str, capability: StoreCapabilities) -> bool:
-                """
-                Returns always True for this DummyWriter.
-                """
-                return True
-
-            def starting_run(self, schema_def, pipeline, processing_args):
-                """
-                Capture SchemaDef.
-                """
-                self.schema_def = schema_def.clone()
-                return schema_def
-
-            def run(self, data_store, processing_args):
-                """
-                Doing something.
-                """
-                if data_type == DataStageType.SCHEMA:
-                    return iter([])
-                else:
-                    for index, row in enumerate(data_store):
-                        feature = {
-                            'type': row.type,
-                            'fid': row.fid if hasattr(row, 'fid') else index,
-                            'properties': row.properties,
-                            'geometry': shapely_mapping(row.geometry)
-                        }
-                        self.features.append(feature)
-                        yield row
-
-                    pass
-
-            def result(self):
-                """
-                Returns the data collected.
-                """
-                if data_type == DataStageType.SCHEMA:
-                    return self.schema_def
-                else:
-                    data = {
-                        'type': 'FeatureCollection',
-                        'crs': {
-                            'type': 'name',
-                            'properties': { 'name': 'EPSG:' + str(self.schema_def.srid) }
-                        },
-                        'features': self.features
-                    }
-                    return data
 
         current_list = self._objects
         try:
             new_list = list()
 
-            data_writer = DataWriter()
+            data_writer = PipelineManager._DataStageWriter(data_type)
             data_writer.ti_ = type('TreeMetadata', (object,), {
                 'parent': None, 'children': [], 'inputs': OrderedDict(), 'outputs': OrderedDict()
             })
