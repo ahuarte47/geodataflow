@@ -32,6 +32,8 @@
 """
 
 from enum import Enum
+from typing import Any, Dict
+from geodataflow.core.processing import ProcessingUtils
 
 
 class DataStageType(str, Enum):
@@ -40,3 +42,12 @@ class DataStageType(str, Enum):
     """
     SCHEMA = 'SCHEMA'
     ROWS = 'ROWS'
+
+    @staticmethod
+    def as_dict(fid: Any, obj: object) -> Dict[str, Any]:
+        """
+        Converts the specified Object to Dict.
+        """
+        obj = ProcessingUtils.object_as_dict(obj)
+        obj['fid'] = fid
+        return obj

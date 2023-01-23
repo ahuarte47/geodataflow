@@ -517,15 +517,9 @@ class PipelineManager:
             if self.data_type == DataStageType.SCHEMA:
                 return iter([])
             else:
-                from shapely.geometry import mapping as shapely_mapping
-
                 for index, row in enumerate(data_store):
-                    feature = {
-                        'type': row.type,
-                        'fid': row.fid if hasattr(row, 'fid') else index,
-                        'properties': row.properties,
-                        'geometry': shapely_mapping(row.geometry)
-                    }
+                    fid = row.fid if hasattr(row, 'fid') else index
+                    feature = DataStageType.as_dict(fid, row)
                     self.features.append(feature)
                     yield row
 

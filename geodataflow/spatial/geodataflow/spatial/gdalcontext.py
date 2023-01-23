@@ -30,10 +30,15 @@
 ===============================================================================
 """
 
-from typing import Dict, Type
+from typing import Any, Dict, Type
 
 from geodataflow.pipeline.pipelinecontext import PipelineContext
-from geodataflow.core.processing import ProcessingArgs
+from geodataflow.pipeline.datastagetypes import DataStageType
+from geodataflow.core.processing import ProcessingArgs, ProcessingUtils
+
+import pyproj as pj
+from shapely.geometry import mapping as shapely_mapping
+from shapely.ops import transform
 
 
 class GdalPipelineContext(PipelineContext):
@@ -57,3 +62,34 @@ class GdalPipelineContext(PipelineContext):
         """
         from geodataflow.spatial.gdalenv import GdalEnv
         return GdalEnv(config_options=GdalEnv.default_options(), temp_path=temp_path)
+
+
+def as_geodict_(fid: Any, obj: object) -> Dict[str, Any]:
+    """
+    Converts the specified Object to Dict.
+    """
+    if hasattr(obj, 'properties') and hasattr(obj, 'geometry'):
+        srid = obj.geometry.get_srid()
+
+        if srid != 4326:
+            source_crs = pj.CRS.from_epsg(srid)
+            target_crs = pj.CRS.from_epsg(4326)
+            transform_fn = pj.Transformer.from_crs(source_crs, target_crs, always_xy=True).transform
+            geometry = transform(transform_fn, obj.geometry)
+        else:
+            geometry = obj.geometry
+
+        feature = {
+            'type': 'Feature',
+            'fid': fid,
+            'properties': obj.properties,
+            'geometry': shapely_mapping(geometry)
+        }
+        return feature
+
+    obj = ProcessingUtils.object_as_dict(obj)
+    obj['fid'] = fid
+    return obj
+
+
+DataStageType.as_dict = as_geodict_

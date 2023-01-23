@@ -72,6 +72,7 @@
   <link rel="stylesheet" type="text/css" href="css/leaflet.css" />
   <link rel="stylesheet" type="text/css" href="css/requests.css" />
   <link rel="stylesheet" type="text/css" href="css/previews.css" />
+  <link rel="stylesheet" type="text/css" href="css/popuptable.css" />
 
   <!-- DOM content -->
   <header>
@@ -162,6 +163,14 @@
     </div>
   </div>
   <div class="dialog" hidden>
+    <div class="toolbar">
+      <button type="button" class="toolButton" id="_dataMapButton" onclick="_datamapButton_onClick(event)" title="Preview features in Map" style="display:none;">
+        <i class="fas fa-globe fa-2x"></i>
+      </button>
+      <button type="button" class="toolButton" id="_dataRowButton" onclick="_datarowButton_onClick(event)" title="Preview features in Table" style="display:none;">
+        <i class="fas fa-table fa-2x"></i>
+      </button>
+    </div>
     <div class="wrapper">
       <span class="dialog-close" onclick="_dialogCloseButton_onClick(event)" title="Close window">&times;</span>
       <div class="dialog-content" tabindex="0">
@@ -831,6 +840,36 @@
       onDataChanged('cloneNode', newNodeId);
     }
 
+    // Preview features in Table.
+    function _datarowButton_onClick(event) {
+      let button = event.currentTarget;
+      let featureCollection = button.featureCollection;
+
+      let datamapButton = document.getElementById('_dataMapButton');
+      datamapButton.style.display = 'inline-block';
+      let datarowButton = document.getElementById('_dataRowButton');
+      datarowButton.style.display = 'none';
+
+      let tableDiv = document.createElement('div');
+      HtmlContent.loadHtmlContentOfPreviewTable(tableDiv, featureCollection);
+      showModalWindow(tableDiv);
+    }
+
+    // Preview features in Map.
+    function _datamapButton_onClick(event) {
+      let button = event.currentTarget;
+      let featureCollection = button.featureCollection;
+
+      let datamapButton = document.getElementById('_dataMapButton');
+      datamapButton.style.display = 'none';
+      let datarowButton = document.getElementById('_dataRowButton');
+      datarowButton.style.display = 'inline-block';
+
+      let dialogDiv = document.querySelector('.dialog');
+      let contentDiv = dialogDiv.querySelector('.dialog-content');
+      HtmlContent.loadHtmlContentOfPreviewMap(contentDiv, featureCollection);
+    }
+
     var previewCount = 0;
     var runIntervalFunc = null;
     var requestsIntervalFunc = null;
@@ -842,14 +881,16 @@
       let workflowName = editor.module;
       let workflow = editor.drawflow.drawflow[workflowName].data;
 
-      let buttonFlag = document.getElementById('_dataButtonFlag');
-      let dataIntervalFunc = null;
-
       if (previewCount > 0) {
         let infoMessage = 'Another Preview processing is still working!\n\nPlease, wait for results.';
         MessageBox.show(errorMessage, 'INFO', ['OK']);
         return;
       }
+
+      let buttonFlag = document.getElementById('_dataButtonFlag');
+      let dataIntervalFunc = null;
+      let datamapButton = document.getElementById('_dataMapButton');
+      let datarowButton = document.getElementById('_dataRowButton');
 
       // Get DataRows of Object...
       (async () => {
@@ -878,9 +919,17 @@
           }
 
           // Show results.
+          let featureCollection = info.dataOfStage;
           let tableDiv = document.createElement('div');
-          tableDiv.innerHTML = HtmlContent.getHtmlContentOfPreviewTable(info.dataOfStage);
+          HtmlContent.loadHtmlContentOfPreviewTable(tableDiv, featureCollection);
           showModalWindow(tableDiv);
+
+          // Show in Map/Table?
+          datamapButton.style.display = 'inline-block';
+          datamapButton.disabled = featureCollection.features.length == 0;
+          datamapButton.featureCollection = featureCollection;
+          datarowButton.disabled = featureCollection.features.length == 0;
+          datarowButton.featureCollection = featureCollection;
         }
         catch (e) {
           let errorMessage = `Failed to process Preview of Object!\n\n${e}`;
@@ -1027,6 +1076,11 @@
     function _dialogCloseButton_onClick(event) {
       document.querySelector('.workbench').style.display = 'block';
       document.querySelector('.dialog').style.display = 'none';
+
+      let datamapButton = document.getElementById('_dataMapButton');
+      datamapButton.style.display = 'none';
+      let datarowButton = document.getElementById('_dataRowButton');
+      datarowButton.style.display = 'none';
 
       let contentDiv = document.querySelector('.dialog-content');
       if (contentDiv.finishCallback) { contentDiv.finishCallback(contentDiv.finishCallbackArgs); }

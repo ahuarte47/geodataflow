@@ -1,0 +1,45 @@
+/* Elements embedded in Popup attributes table */
+
+.popupmapTitle {
+    padding: 8px;
+    text-align: center;
+    font-size: large;
+    font-weight: bold;
+    color: black;
+    width: 100%;
+}
+
+.popupmapTable {
+    font-family: var(--bs-body-font-family);
+    width: 100%;
+}
+
+.popupmapTable th {
+    padding: 4px;
+    background-color: rgb(70, 70, 70);
+    color: white;
+    text-align: left;
+    font-weight: bold;
+}
+.popupmapTable td {
+    padding: 4px;
+    text-align: left;
+    border: 1px solid #DDD;
+}
+
+.popupmapTable td:nth-child(3n+1) {
+    font-weight: bold;
+}
+.popupmapTable td:nth-child(3n+2) {
+    word-break: break-word;
+}
+.popupmapTable tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+.popupmapTable tr:hover {
+    background-color: #dfecf8;
+}
+
+.leaflet-popup-content {
+    width: 400px !important;
+}

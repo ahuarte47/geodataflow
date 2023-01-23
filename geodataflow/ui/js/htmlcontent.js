@@ -235,8 +235,8 @@ class HtmlContent {
     return moduleDiv.innerHTML;
   }
 
-  // Returns the HTML content of the specified Preview Data Table.
-  static getHtmlContentOfPreviewTable(featureCollection) {
+  // Loads the HTML content of the specified Preview Data Table.
+  static loadHtmlContentOfPreviewTable(contentDiv, featureCollection) {
     let features = featureCollection.features;
     let header = '';
 
@@ -272,7 +272,60 @@ class HtmlContent {
           ${dataRow}
         </tr>`;
     });
-    return html + '</tbody></table>';
+    contentDiv.innerHTML = html + '</tbody></table>';
+  }
+
+  // Loads the HTML content of the specified Preview Data Map.
+  static loadHtmlContentOfPreviewMap(contentDiv, featureCollection) {
+    let features = featureCollection.features;
+
+    contentDiv.innerHTML = '';
+    let mapDiv = document.createElement('div');
+    mapDiv.setAttribute('id', 'parameter-map');
+    contentDiv.appendChild(mapDiv);
+
+    // Create the Leaflet map.
+    let map = L.map('parameter-map', {});
+    let osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { noWrap: true });
+    osmLayer.addTo(map);
+    let geocoder = L.Control.geocoder({position: 'topleft'});
+    geocoder.addTo(map);
+    let mousePos = L.control.mousePosition({position: 'bottomleft', emptyString: '', prefix: '<b>LatLng:</b> ', numDigits: 5});
+    mousePos.addTo(map);
+    let scaleBar = L.control.scale({position: 'bottomright'});
+    scaleBar.addTo(map);
+
+    // Layer Control with two Basemaps.
+    let satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { noWrap: true });
+    let baseLayers = {'OSM Standard': osmLayer, 'ESRI Satellite': satLayer};
+    let layerControl = L.control.layers(baseLayers, {}, {position: 'topright'});
+    layerControl.addTo(map);
+
+    // Popup Table.
+    let _popupHtmlTable = function(feature, layer) {
+      let html = '<div class="popupmapTitle">Properties of Feature</div><table class="popupmapTable"><tr><th>Property</th><th>Value</th></tr>';
+      let properties = feature.properties;
+
+      Object.keys(properties).forEach((key) => {
+          let propertyName = key.indexOf(':') != -1 ? key.slice(key.indexOf(':') + 1) : key;
+          html += `<tr><td>${propertyName}</td><td>${properties[key]}</td></tr>`;
+      });
+      layer.bindPopup(html + '</table>');
+    }
+
+    // Append Features.
+    let featureLayers = new L.FeatureGroup();
+    let opts = { onEachFeature: _popupHtmlTable };
+    features.forEach((feature) => { L.geoJson(feature, opts).getLayers().forEach((layer) => { featureLayers.addLayer(layer); }); });
+    map.addLayer(featureLayers);
+
+    // Fit map.
+    if (featureLayers.getLayers().length > 0) {
+      map.fitBounds(featureLayers.getBounds());
+    }
+    else {
+      map.setView([10, 0], 2);
+    }
   }
 
   // Returns the HTML content of the specified Requests Report Table.
