@@ -43,6 +43,8 @@ Videos demostrating **GeodataFlow**:
 * [Downloading a NDVI raster from a STAC Catalog](https://www.youtube.com/watch?v=NodnUUYZJkU&list=PLEmI_ksy4QHaAg64XbwnHFpwaLc8Hbr4-&index=4)
 * [Filtering Features applying Spatial Relations](https://www.youtube.com/watch?v=5OxrXffwUeM&list=PLEmI_ksy4QHaAg64XbwnHFpwaLc8Hbr4-&index=5)
 * [Plotting a NDVI Time Series Graph of a polygon](https://www.youtube.com/watch?v=qKuUW-PXizg&list=PLEmI_ksy4QHaAg64XbwnHFpwaLc8Hbr4-&index=6)
+* [Loading Datasets from Google Earth Engine (GEE)](https://www.youtube.com/watch?v=qKuUW-PXizg&list=PLEmI_ksy4QHaAg64XbwnHFpwaLc8Hbr4-&index=7)
+* [Preview the stages of a Workflow in a Table or Map](https://www.youtube.com/watch?v=qKuUW-PXizg&list=PLEmI_ksy4QHaAg64XbwnHFpwaLc8Hbr4-&index=8)
 
 ### Workflow examples
 
