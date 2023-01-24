@@ -179,7 +179,8 @@ class EOProductCatalog(AbstractFilter):
         geometry = GeometryUtils.create_geometry_from_bbox(envelope[0], envelope[1], envelope[2], envelope[3])
 
         # Fetch schema from first EO Product.
-        app_config = pipeline.config
+        app_config = pipeline.config.copy()
+        app_config['GEODATAFLOW__TEMP__PATH'] = processing_args.temp_data_path()
         field_dict = {f.name: f for f in schema_def.fields}
         new_fields = [
             FieldDef(name='productType', data_type=DataType.String),
