@@ -50,8 +50,8 @@ def search_gee_datasets() -> List[Dict]:
     Discover list of available GEE Datasets.
     """
     try:
-        respose = requests.get(GEE_CATALOG_URL)
-        catalog_list = respose.json()
+        response = requests.get(GEE_CATALOG_URL)
+        catalog_list = response.json()
         datasets = [dataset for dataset in catalog_list if dataset['type'] == 'image_collection']
         datasets = sorted(datasets, key=lambda obj: obj['title'], reverse=False)
         return datasets
