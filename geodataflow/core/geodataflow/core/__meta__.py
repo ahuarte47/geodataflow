@@ -32,7 +32,7 @@
 """
 
 __name__ = 'geodataflow.core'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 __description__ = \
   'Main subpackage of GeodataFlow, one Geoprocessing framework for geographical & Earth Observation (EO) data.'
 __author__ = 'Alvaro Huarte'

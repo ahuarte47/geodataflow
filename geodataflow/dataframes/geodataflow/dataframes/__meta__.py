@@ -32,7 +32,7 @@
 """
 
 __name__ = 'geodataflow.dataframes'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 __description__ = 'GeodataFlow backend implementation with GeoPandas (GeoDataFrames).'
 __author__ = 'Alvaro Huarte'
 __email__ = 'ahuarte47@gmail.com'
