@@ -34,7 +34,7 @@ import os
 import logging
 import importlib
 import unittest
-from typing import Dict, Iterable
+from typing import Dict
 
 from geodataflow.core.settingsmanager import ApplicationSettings
 from geodataflow.pipeline.pipelinecontext import PipelineContext
@@ -82,7 +82,7 @@ class TestGeodataFlowWithOSGeo(unittest.TestCase):
         # Returns basic Context.
         return GdalPipelineContext(custom_modules={}, custom_modules_path=custom_modules_path)
 
-    def process_pipeline(self, test_func: callable, pipeline_file: str, pipeline_args: Dict[str, str] = {}) -> Iterable:
+    def process_pipeline(self, test_func: callable, pipeline_file: str, pipeline_args: Dict[str, str] = {}):
         """
         Process the specified Pipeline file and returns the collection of Features.
         """

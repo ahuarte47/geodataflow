@@ -220,7 +220,8 @@ class EOProductCatalog(AbstractFilter):
         Transform input Geospatial data. It should return a new iterable set of Geospatial features.
         """
         schema_def = self.pipeline_args.schema_def
-        app_config = self.pipeline_args.config
+        app_config = self.pipeline_args.config.copy()
+        app_config['GEODATAFLOW__TEMP__PATH'] = processing_args.temp_data_path()
 
         report_info = {
             'driver': self.driver,
