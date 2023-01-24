@@ -534,10 +534,6 @@ class PipelineManager:
             else:
                 data = {
                     'type': 'FeatureCollection',
-                    'crs': {
-                        'type': 'name',
-                        'properties': {'name': 'EPSG:' + str(self.schema_def.srid)}
-                    },
                     'features': self.features
                 }
                 return data
