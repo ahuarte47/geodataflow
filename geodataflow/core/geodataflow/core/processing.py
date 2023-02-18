@@ -38,6 +38,7 @@ import logging
 import subprocess
 import shlex
 import shutil
+import ast
 import math
 from math import *  # noqa: F401,F403
 from typing import Any, Callable, Dict, List, Iterable, Union
@@ -57,6 +58,8 @@ def register_eval_function_stack() -> Dict[str, Callable]:
     ])
     function_dict['str'] = str
     function_dict['len'] = len
+    function_dict['int'] = int
+    function_dict['float'] = float
 
     def _switch_func(value, options, default_val=None):
         """
@@ -77,6 +80,33 @@ def register_eval_function_stack() -> Dict[str, Callable]:
     function_dict['iif'] = _iif_func
 
     return function_dict
+
+
+class ExpressionValidator(ast.NodeVisitor):
+    """
+    AST Visitor to validate callable Functions (Security reasons).
+    """
+    def __init__(self, function_stack: Dict) -> None:
+        super().__init__()
+        self.function_stack = function_stack
+
+    def generic_visit(self, node):
+        #
+        if isinstance(node, ast.Call):
+            item = getattr(node, "func")
+            name = item.value.func.id if isinstance(item, ast.Attribute) else item.id
+
+            if not name in self.function_stack:
+                raise Exception(f"The use of the function '{name}' is not allowed.")
+
+        elif isinstance(node, ast.Attribute):
+            item = getattr(node, "value")
+            name = item.id
+
+            if name in ["os", "sys"]:
+                raise Exception(f"The use of the package '{name}' is not allowed.")
+
+        ast.NodeVisitor.generic_visit(self, node)
 
 
 # Stack of callable math functions to include in an eval() execution, only MATH functions for safety.
@@ -162,6 +192,11 @@ class ProcessingUtils:
 
         if BASIC_EVAL_FUNCTION_STACK is None:
             BASIC_EVAL_FUNCTION_STACK = register_eval_function_stack()
+
+        # Validate callable functions.
+        tree = ast.parse(source=expression, filename='<ast>', mode='eval')
+        validator = ExpressionValidator(BASIC_EVAL_FUNCTION_STACK)
+        validator.visit(tree)
 
         if isinstance(expression, str):
             xpr = expression
