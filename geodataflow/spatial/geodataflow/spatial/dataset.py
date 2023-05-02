@@ -166,6 +166,28 @@ class GdalDataset:
 
         return False
 
+    def is_empty(self) -> bool:
+        """
+        Returns if this Dataset is empty, that is to say, all pixels are NODATA.
+        """
+        raster_size_x = self._dataset.RasterXSize
+        raster_size_y = self._dataset.RasterYSize
+        raster_count = self._dataset.RasterCount
+
+        for band_index in range(0, raster_count):
+            band_s = self._dataset.GetRasterBand(band_index + 1)
+            raster = band_s.ReadAsArray(xoff=0, yoff=0, win_xsize=raster_size_x, win_ysize=raster_size_y)
+            nodata = band_s.GetNoDataValue()
+            band_s = None
+
+            # Get number of pixels different to NODATA.
+            mask_b = raster != self.data_type(nodata)
+            mask_c = mask_b.sum()
+            if mask_c > 0:
+                return False
+
+        return True
+
     def get_metadata(self) -> Dict[str, Any]:
         """
         Returns the main geospatial metadata of this Dataset.
@@ -526,7 +548,7 @@ class GdalDataset:
 
         pass
 
-    def polygonize(self, band_index: int = 0) -> Any:
+    def polygonize(self, band_index: int = 0, apply_as_mask: bool = False) -> Any:
         """
         Returns the Polygon of all connected regions of nodata pixels in the raster.
         """
@@ -557,6 +579,18 @@ class GdalDataset:
 
         # Polygonize specified Band.
         rs_band = self._dataset.GetRasterBand(band_index + 1)
+        # Converting to mask?
+        if apply_as_mask:
+            raster_size_x = self._dataset.RasterXSize
+            raster_size_y = self._dataset.RasterYSize
+            raster = rs_band.ReadAsArray(xoff=0, yoff=0, win_xsize=raster_size_x, win_ysize=raster_size_y)
+            nodata = rs_band.GetNoDataValue()
+            mask_b = raster != self.data_type(nodata)
+            raster[mask_b] = 1
+            raster[~mask_b] = 0
+            rs_band.WriteArray(raster)
+            rs_band.FlushCache()
+
         ms_band = rs_band.GetMaskBand()
         gdal.Polygonize(rs_band, ms_band, feature_layer, 0, [], callback=None)
         ms_band = None
