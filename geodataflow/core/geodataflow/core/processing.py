@@ -96,7 +96,7 @@ class ExpressionValidator(ast.NodeVisitor):
             item = getattr(node, "func")
             name = item.value.func.id if isinstance(item, ast.Attribute) else item.id
 
-            if not name in self.function_stack:
+            if name not in self.function_stack:
                 raise Exception(f"The use of the function '{name}' is not allowed.")
 
         elif isinstance(node, ast.Attribute):
