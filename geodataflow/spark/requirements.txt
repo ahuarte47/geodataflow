@@ -1,3 +1,0 @@
-# This file specifies requirements for the 'geodataflow.spark' package.
-geodataflow.core
-geodataflow.spatial
